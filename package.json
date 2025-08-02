@@ -1,0 +1,11 @@
+{
+  "name": "solo-levelling",
+  "private": true,
+  "scripts": {
+    "format": "prettier --write ."
+  },
+  "devDependencies": {
+    "prettier": "^3.6.2"
+  },
+  "packageManager": "pnpm@10.14.0"
+}
