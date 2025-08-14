@@ -1,20 +1,20 @@
-import process from "./config/config"
+import { env } from "./config/env.js";
+import app from "./app.js";
+import connectDB from "./config/db.js";
 
-import connectDB from "./config/db";
-import app from "./app";
 
-
-const port:string = process.env.PORT || "5500";
 
 async function server(){
     try {
         await connectDB();
-        app.listen(port, () => {
-            console.log(`Server running on http://localhost:${port}`);
+        app.listen(env.port, () => {
+            console.log(`Server running on http://localhost:${env.port}`);
     })
     } catch (error) {
         throw Error("error start the server!!")
     }
 }
+
+console.log("hekk")
 
 server()
