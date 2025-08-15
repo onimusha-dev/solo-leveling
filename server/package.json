@@ -2,21 +2,19 @@
   "name": "server",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "dist/index.js",
   "type": "module",
   "scripts": {
-    "build": "pnpm tsc",
-    "start": "node dist/server.js",
-    "dev": "nodemon"
+    "build": "NODE_OPTIONS='--max-old-space-size=512' tsc",
+    "start": "node dist/index.js",
+    "dev": "kill-port 8000 && tsc-watch --onSuccess \"node dist/index.js\""
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "packageManager": "pnpm@10.14.0",
-  "devDependencies": {
-    "nodemon": "^3.1.10",
-    "ts-node": "^10.9.2",
-    "typescript": "^5.9.2"
+  "engines": {
+    "node": ">=24.5.0"
   },
   "dependencies": {
     "bcrypt": "^6.0.0",
@@ -24,5 +22,16 @@
     "express": "^5.1.0",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.17.1"
+  },
+  "devDependencies": {
+    "@types/bcrypt": "^5.0.2",
+    "@types/express": "^4.17.21",
+    "@types/jsonwebtoken": "^9.0.6",
+    "kill-port": "^2.0.1",
+    "nodemon": "^3.1.10",
+    "ts-node": "^10.9.2",
+    "tsc-watch": "^7.1.1",
+    "tsconfig-paths": "^4.2.0",
+    "typescript": "^5.9.2"
   }
 }
