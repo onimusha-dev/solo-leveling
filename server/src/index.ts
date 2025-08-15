@@ -14,7 +14,4 @@ async function server(){
         throw Error("error start the server!!")
     }
 }
-
-console.log("hekk")
-
 server()

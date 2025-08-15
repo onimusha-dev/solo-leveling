@@ -18,6 +18,5 @@ export const env = {
     refreshTokenExpiry: process.env.REFRESH_TOKEN_EXPIRY,
 
 
-
 }
 
