@@ -1,76 +1,40 @@
-import mongoose from "mongoose";
+import { Schema, Document, model } from "mongoose";
 
-// this is the schema for extra user data
-const userData = new mongoose.Schema(
+// schema types 
+export interface IUserData extends Document {
+  bio: string,
+  gender: string,
+  dob: Date
+}
+
+export interface IUser extends Document {
+  fullName: string,
+  email: string,
+  username: string,
+  password?: string,
+  termsAccept: boolean,
+  userData: IUserData
+}
+
+// creating schemas
+const userDataSchema: Schema<IUserData> = new Schema(
   {
-    bio: {
-      type: String,
-      required: true,
-      trim: true,
-    },
-    gender: {
-      type: String,
-      required: true,
-      trim: true,
-    },
-    dob: {
-      type: String,
-      required: true,
-      trim: true,
-    },
+    bio: { type: String, trim: true },
+    gender: String,
+    dob: Date,
   }
 )
 
-// this is the main schema
-const userSchema = new mongoose.Schema(
+const userSchema: Schema<IUser> = new Schema(
   {
-    name: {
-      type: String,
-      required: true,
-      trim: true,
-    },
-    email: {
-      type: String,
-      required: true,
-      unique: true,
-      trim: true,
-      lowercase: true,
-    },
-    username: {
-      type: String,
-      required: true,
-      unique: true,
-      trim: true,
-      lowercase: true,
-    },
-    password: {
-      type: String,
-      required: true,
-    },
-    termsAccept: {
-      type: Boolean,
-      default: false,
-      // required: true,
-    },
-    userData: [userData],
+    fullName: { type: String, required: true, trim: true },
+    email: { type: String, required: true, unique: true, trim: true, lowercase: true },
+    username: { type: String, required: true, unique: true, trim: true, lowercase: true },
+    password: { type: String, required: true },
+    termsAccept: { type: Boolean, default: false },
+    userData: userDataSchema,
+  },
+  { timestamps: true }
+)
 
-  }, { timestamps: true }
-);
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-export const User = mongoose.model("User", userSchema);
+export const User = model<IUser>("User", userSchema)
