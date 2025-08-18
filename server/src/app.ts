@@ -1,18 +1,19 @@
 import express from "express";
 
 
-
-import routers from "./router";
-
-
+import router from './router/index'
 const app = express();
 
 
-app.get('/', (req, res)=>{
+app.use(express.json())
+app.use(express.urlencoded())
+
+
+app.get('/', (req, res) => {
    res.send("hellow susie!")
 })
 
-app.use('/api/v1', routers.userRouter)
+app.use('/api/v1', router)
 
 
 export default app;

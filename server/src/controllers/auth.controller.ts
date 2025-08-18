@@ -1,23 +1,9 @@
-import { Request, Response, NextFunction } from "express";
+import { Request, Response } from "express";
 
-interface SignUpBody {
-    fullName: string;
-    email: string;
-    password: string;
-}
-
-interface signUpResponse {
-    success: boolean;
-    status: number;
-    message: string;
-    data: SignUpBody;
-    token?: string;
-}
-
-
-const signUp = async (req: Request<{}, signUpResponse, SignUpBody>, res: Response<signUpResponse>) => {
+const signUp = async (req: Request, res: Response) => {
     try {
-        const { fullName, email, password } = req.body;
+        console.log(req.body)
+        const { fullName, email, password } = req.body ?? {};
         console.log(fullName, email, password)
 
         res.send({
@@ -30,13 +16,15 @@ const signUp = async (req: Request<{}, signUpResponse, SignUpBody>, res: Respons
                 password
             }
         })
+        return
     }
     catch (error) {
         console.log(error);
+        res.send('fuck you')
     }
 }
 
 
 export default {
-    signUp
+    signUp,
 }

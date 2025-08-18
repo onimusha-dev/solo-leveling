@@ -6,12 +6,10 @@ dotenv.config({
 
 const requiredEnvVars = [
     "MONGO_URI",
-    "DB_NAME",
     "ACCESS_TOKEN_CODE",
     "ACCESS_TOKEN_EXPIRY",
     "REFRESH_TOKEN_CODE",
     "REFRESH_TOKEN_EXPIRY",
-    "APP_NAME",
 ] as const;
 
 for (const varName of requiredEnvVars) {

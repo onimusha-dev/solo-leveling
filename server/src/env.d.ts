@@ -10,8 +10,6 @@ declare namespace NodeJS {
 
         REFRESH_TOKEN_CODE?: string;
         REFRESH_TOKEN_EXPIRY?: `${number}d`;
-
-        APP_NAME: string;
     
     }
 }

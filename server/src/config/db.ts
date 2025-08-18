@@ -1,11 +1,11 @@
 import mongoose from "mongoose";
-import { env } from "./env.js";
-import { DB_NAME } from "../constant.js";
+import { env } from "./env";
+import { DB_NAME } from "../constant";
 
 
 const connectDB = async () => {
     try {
-      const connectionString = env.environment === "production" ? `${env.mongoURI}/${DB_NAME}` : `mongodb://127.0.0.1:27017/solo-leveling`
+      const connectionString = `${env.mongoURI}/${DB_NAME}`
 
       const conn = await mongoose.connect(connectionString);
       console.log(`MongoDB Connected: ${conn.connection.host}`);

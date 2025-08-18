@@ -20,6 +20,7 @@ const createNote = (req: Request<{}, resBody,requestBody>, res: Response<resBody
             const { title, body, tags } = req.body
 
             console.log(title, body, tags)
+            res.json()
 
     } catch (error) {
         console.log(error)
