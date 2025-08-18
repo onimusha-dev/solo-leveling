@@ -2,26 +2,30 @@ import { Schema, Document, model } from "mongoose";
 
 // schema types 
 export interface IUserData extends Document {
-  bio: string,
+  bio?: string,
   gender: string,
-  dob: Date
+  dob?: Date
 }
 
 export interface IUser extends Document {
   fullName: string,
   email: string,
   username: string,
-  password?: string,
+  password: string,
   termsAccept: boolean,
-  userData: IUserData
+  userData?: IUserData
 }
 
 // creating schemas
 const userDataSchema: Schema<IUserData> = new Schema(
   {
-    bio: { type: String, trim: true },
-    gender: String,
-    dob: Date,
+    bio: { type: String, trim: true, required: false },
+    gender: {
+      type: String,
+      enum: ['male', 'female', 'other', 'unknown'],
+      default: 'unknown'
+    },
+    dob: { type: Date, required: false },
   }
 )
 
@@ -32,7 +36,7 @@ const userSchema: Schema<IUser> = new Schema(
     username: { type: String, required: true, unique: true, trim: true, lowercase: true },
     password: { type: String, required: true },
     termsAccept: { type: Boolean, default: false },
-    userData: userDataSchema,
+    userData: { type: userDataSchema, required: false },
   },
   { timestamps: true }
 )
