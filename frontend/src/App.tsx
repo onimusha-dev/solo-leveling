@@ -1,8 +1,17 @@
+import Settings from "./Pages/Settings";
+import Feeds from "./Pages/Feeds";
+
+
+import NavBar from "./Components/NavBar";
+
+
 function App() {
 	return (
-		<div className="min-h-screen flex bg-black text-white items-center justify-center text-2xl font-bold text-center">
-			Hello Vite + React + TailwindCSS!
-		</div>
+		<>
+		<Feeds />
+			
+			<NavBar />
+		</>
 	);
 }
 
