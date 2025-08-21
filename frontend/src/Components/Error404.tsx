@@ -1,4 +1,4 @@
-
+import { Link } from "react-router";
 
 function Error404(){
     return(
@@ -7,12 +7,10 @@ function Error404(){
             <p className="mt-4 md:text-2xl text-gray-500 text-xl px-5">
                 Oops! The page you're looking for doesn't exist.
             </p>
-            {/* <Link to="/" className="mt-6 text-lg text-blue-600 hover:underline">
+            <Link to="/" className="mt-6 text-lg text-blue-600 hover:underline">
                 Go Back Home
-            </Link> */}
-            <a href="/" className="mt-6 text-lg text-blue-600 hover:underline">
-                Go Back Home
-            </a>
+            </Link>
+
         </div>
     
     )
