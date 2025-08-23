@@ -15,6 +15,11 @@ import Settings from './pages/Settings/Index'
 import SupportUs from './pages/Settings/pages/SupportUs'
 import General from './pages/Settings/pages/General'
 import PrivacyAndSafety from './pages/Settings/pages/PrivacyAndSafety'
+import AuthLayout from './layouts/AuthLayout'
+import Login from './pages/Auth/Login'
+import Register from './pages/Auth/Register'
+import { Navigate } from 'react-router'
+import PrivacyPolicy from './pages/Policies/PrivacyPolicy'
 
 
 const router = createBrowserRouter(
@@ -38,6 +43,24 @@ const router = createBrowserRouter(
             { path: "support-us", element: <SupportUs /> },
           ]
         },
+      ]
+    },
+    {
+      path: '/auth',
+      element: <AuthLayout />,
+      children: [
+        { index: true, element: <Navigate to="login" replace /> },
+        { path: 'login', element: <Login /> },
+        { path: 'register', element: <Register /> },
+        { path: 'reset-password', element: <Home /> },
+      ]
+    },
+    {
+      path: 'policies',
+      element: <MainLayout />,
+      children: [
+        { index: true, element: <Navigate to="privacy" replace /> },
+        { path: 'privacy', element: <PrivacyPolicy /> },
       ]
     },
     {
