@@ -1,5 +1,6 @@
 import { IoSettings } from "react-icons/io5";
-import { IoAddSharp } from "react-icons/io5";
+import { RiAddLine } from "react-icons/ri";
+
 
 import { NavLink } from "react-router";
 
@@ -13,7 +14,9 @@ function Home() {
                     <div className="flex items-center justify-center">
                         <NavLink to={'/settings'}><IoSettings size={24} opacity={0.75} /></NavLink>
                     </div>
-                    <div className="w-10 h-10 rounded-2xl bg-yellow-500/30 items-center justify-center flex"><IoAddSharp size={24} opacity={0.75 } /></div>
+                    <div className="flex items-center justify-center">
+                        <NavLink to={'/feeds'}><RiAddLine size={32} opacity={0.75} /></NavLink>
+                    </div>
                 </div>
             </div>
             <div className="">
