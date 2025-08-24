@@ -5,11 +5,11 @@ declare namespace NodeJS {
 
         MONGO_URI: string;
 
-        ACCESS_TOKEN_CODE?: string;
-        ACCESS_TOKEN_EXPIRY?: `${number}m`;
+        ACCESS_TOKEN_CODE: string;
+        ACCESS_TOKEN_EXPIRY: `${number}m`;
 
-        REFRESH_TOKEN_CODE?: string;
-        REFRESH_TOKEN_EXPIRY?: `${number}d`;
+        REFRESH_TOKEN_CODE: string;
+        REFRESH_TOKEN_EXPIRY: `${number}d`;
     
     }
 }
