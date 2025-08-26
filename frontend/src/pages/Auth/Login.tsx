@@ -1,6 +1,46 @@
+import { useState } from "react"
 import { NavLink } from "react-router"
 
 function Login() {
+  const [userData, setUserData] = useState({
+    identifier: '',
+    password: '',
+  })
+  const [MdRememberMe, setRememberMe] = useState(false)
+
+  const handleRememberMe = () => {
+    setRememberMe(!MdRememberMe)
+  }
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setUserData({ ...userData, [e.target.name]: e.target.value })
+
+    
+
+
+  }
+
+  const handleClick = (e: React.FormEvent) => {
+    e.preventDefault()
+    console.log(userData)
+
+    if (userData.identifier === '' || userData.password === '')
+      return console.log('All fields are required')
+
+
+    fetch('http://localhost:5500/api/v1/auth/login', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(userData)
+    })
+      .then(res => res)
+      .then(data => console.log(data))
+      .catch(err => console.log(err))
+
+  }
+
   return (
     <div className="flex flex-col md:flex-row gap-10 min-w-full bg-gray-100 p-10 rounded-2xl shadow-md">
 
@@ -12,10 +52,10 @@ function Login() {
 
         <form action="submit" className="flex flex-col w-full gap-4 mt-10">
           <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-              Email Address
+            <label htmlFor="identifier" className="block text-sm font-medium text-gray-700 mb-1">
+              Email Address or username
             </label>
-            <input type="text" placeholder="Email" className="w-full border-1 border-gray-300 rounded-2xl p-3" />
+            <input onChange={handleChange} id="identifier" name="identifier" type="text" placeholder="Email or username" className="w-full border-1 border-gray-300 rounded-2xl p-3" />
           </div>
 
           <div>
@@ -25,17 +65,17 @@ function Login() {
               </label>
               <NavLink to={"/auth/reset-password"} className={'text-sm text-blue-600 hover:text-blue-700'}>Forgot Password?</NavLink>
             </div>
-            <input type="password" placeholder="Password" className="w-full border-1 border-gray-300 rounded-2xl p-3" />
+            <input onChange={handleChange} id="password" name="password" type="password" placeholder="Password" className="w-full border-1 border-gray-300 rounded-2xl p-3" />
           </div>
-          <div className="flex">
-            <label className="flex items-center text-sm text-gray-700">
-              <input type="checkbox" className="w-5 h-5" />
-              <span className="ml-2">Remember me</span>
-            </label>
+
+
+          <div className="flex items-center text-sm text-gray-700">
+            <input onChange={handleRememberMe} id="rememberMe" type="checkbox" className="w-5 h-5" />
+            <label htmlFor="rememberMe" className="ml-2">Remember me</label>
           </div>
-          <button 
+          <button
             type="submit"
-            
+            onClick={handleClick}
             className="text-white rounded-2xl p-3 bg-blue-600 hover:bg-blue-700 ">Login</button>
         </form>
       </div>
