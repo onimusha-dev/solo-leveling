@@ -61,8 +61,7 @@ export const signUpService = async (
 
 
 export interface LoginInput {
-    email?: string
-    username?: string
+    identifier: string
     password: string
 }
 
@@ -88,12 +87,12 @@ export interface LoginInput {
 export const loginService = async (
     data: LoginInput
 ): Promise<{ accessToken: string, refreshToken: string, user: Omit<IUser, "password" | "refreshToken"> }> => {
-
-    if (!data.email && !data.username)
+console.log(data)
+    if (!data.identifier)
         throw new Error("Email or username is required");
 
     const isUser = await User.findOne(
-        data.email ? { email: data.email } : { username: data.username }
+        {$or: ([ { email: data.identifier}, {username: data.identifier }])}
     );
 
     if (!isUser)
@@ -110,8 +109,6 @@ export const loginService = async (
 
     return { accessToken, refreshToken, user: newUserObject };
 }
-
-
 
 /**
  * Logout user and remove refreshToken from DB
