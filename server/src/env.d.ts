@@ -10,6 +10,8 @@ declare namespace NodeJS {
 
         REFRESH_TOKEN_CODE: string;
         REFRESH_TOKEN_EXPIRY: `${number}d`;
+
+        HTTP_ONLY_COOKIE: 'true' | 'false';
     
     }
 }

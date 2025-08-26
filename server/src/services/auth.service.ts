@@ -1,12 +1,14 @@
+import { env } from "../config/env";
 import { User, IUserDocument, IUser } from "../models/User";
+import jwt from 'jsonwebtoken'
 
-interface SignUpInput {
-    fullName: string,
-    username: string,
-    email: string,
-    password: string,
-    confirmPassword: string,
-    termsAccept: boolean,
+export interface SignUpInput {
+    fullName: string
+    username: string
+    email: string
+    password: string
+    confirmPassword: string
+    termsAccept: boolean
 }
 
 /**
@@ -31,10 +33,10 @@ interface SignUpInput {
  *  - user already exists (email/username taken)
  */
 
-export const signUp = async (
+export const signUpService = async (
     data: SignUpInput
 ): Promise<{ accessToken: string, refreshToken: string, newUser: Omit<IUser, "password" | "refreshToken"> }> => {
-
+    console.log(data.password, "   ", data.confirmPassword)
     if (data.password !== data.confirmPassword)
         throw new Error("Passwords do not match");
 
@@ -58,10 +60,10 @@ export const signUp = async (
 }
 
 
-interface LoginInput {
-    email?: string,
-    username?: string,
-    password: string,
+export interface LoginInput {
+    email?: string
+    username?: string
+    password: string
 }
 
 /**
@@ -83,7 +85,7 @@ interface LoginInput {
  *  - password is incorrect
  */
 
-export const login = async (
+export const loginService = async (
     data: LoginInput
 ): Promise<{ accessToken: string, refreshToken: string, user: Omit<IUser, "password" | "refreshToken"> }> => {
 
@@ -108,3 +110,40 @@ export const login = async (
 
     return { accessToken, refreshToken, user: newUserObject };
 }
+
+
+
+/**
+ * Logout user and remove refreshToken from DB
+ */
+export const logoutService = async (refreshToken: string): Promise<void> => {
+
+    if (!refreshToken)
+        throw new Error("Refresh token is requred")
+
+    const decodedToken = jwt.verify(refreshToken, env.refreshTokenCode) as { id: string };
+
+    const user = await User.findById(decodedToken.id);
+
+    if (!user)
+        throw new Error("User not found");
+
+    const isVerified = await user.verifyRefreshToken(refreshToken);
+
+    if (!isVerified)
+        throw new Error("Invalid refresh token");
+
+    await User.updateOne({ _id: user._id }, { $set: { refreshToken: '' } });
+    return;
+}
+
+
+export interface RefreshTokenInput {
+    id: string
+    refreshToken: string
+}
+
+/**
+ * Refreshes the access token using the refresh token.
+ *
+ */

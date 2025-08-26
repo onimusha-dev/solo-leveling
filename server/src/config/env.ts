@@ -10,6 +10,7 @@ const requiredEnvVars = [
     "ACCESS_TOKEN_EXPIRY",
     "REFRESH_TOKEN_CODE",
     "REFRESH_TOKEN_EXPIRY",
+    "HTTP_ONLY_COOKIE"
 ] as const;
 
 for (const varName of requiredEnvVars) {
@@ -32,5 +33,7 @@ export const env = {
 
     refreshTokenCode: process.env.REFRESH_TOKEN_CODE,
     refreshTokenExpiry: process.env.REFRESH_TOKEN_EXPIRY,
+
+    httpOnlyCookie: process.env.HTTP_ONLY_COOKIE === "true",
 
 };
