@@ -1,6 +1,45 @@
 import { NavLink } from "react-router"
+import { useState } from "react"
 
 function Login() {
+
+  const [userData, setUserData] = useState({
+    fullName: '',
+    username: '',
+    email: '',
+    password: '',
+    confirmPassword: '',
+    termsAccept: false
+  })
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setUserData({ ...userData, [e.target.name]: e.target.value })
+    if (e.target.name === 'termsAccept')
+      setUserData({ ...userData, [e.target.name]: e.target.checked })
+
+
+  }
+
+  const handleClick = (e: React.FormEvent) => {
+    e.preventDefault()
+    console.log(userData)
+
+    if (userData.password !== userData.confirmPassword)
+      return console.log('passwords do not match')
+
+    fetch('http://localhost:5500/api/v1/auth/signin', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(userData)
+    })
+      .then(res => res.json())
+      .then(data => console.log(data))
+      .catch(err => console.log(err))
+
+  }
+
   return (
     <div className="flex flex-col md:flex-row gap-10 min-w-full bg-gray-100 p-10 rounded-2xl shadow-md">
 
@@ -15,33 +54,39 @@ function Login() {
             <label htmlFor="fullName" className="block text-sm font-medium text-gray-700 mb-1">
               Full Name
             </label>
-            <input type="text" placeholder="Susie Chan" className="w-full border-1 border-gray-300 rounded-2xl p-3" />
-          </div>
+            <input onChange={handleChange} id="fullName" type="text" name="fullName" placeholder="Susie Chan" className="w-full border-1 border-gray-300 rounded-2xl p-3" />
+          </div>     
+          <div>
+            <label htmlFor="username" className="block text-sm font-medium text-gray-700 mb-1">
+              username
+            </label>
+            <input onChange={handleChange} id="username" type="text" name="username" placeholder="susie.dev" className="w-full border-1 border-gray-300 rounded-2xl p-3" />
+          </div> 
           <div>
             <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
               Email Address
             </label>
-            <input type="text" placeholder="your.email@example.com" className="w-full border-1 border-gray-300 rounded-2xl p-3" />
+            <input onChange={handleChange} id="email" type="text" name="email" placeholder="your.email@example.com" className="w-full border-1 border-gray-300 rounded-2xl p-3" />
           </div>
 
-          <div className="">
-          <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
-            Password
-          </label>            
-            <input type="password" placeholder="At least 8 characters" className="w-full border-1 border-gray-300 rounded-2xl p-3" />
+          <div>
+            <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
+              Password
+            </label>
+            <input onChange={handleChange} id="password" type="password" name="password" placeholder="At least 8 characters" className="w-full border-1 border-gray-300 rounded-2xl p-3" />
             {/* <p className="mt-1 text-xs text-gray-500">Must be at least 8 characters with uppercase, lowercase, and number</p> */}
           </div>
 
-          <div className="">
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
+          <div>
+            <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-1">
               Confirm Password
             </label>
-            <input type="password" placeholder="Confirm your Password" className="w-full border-1 border-gray-300 rounded-2xl p-3" />
+            <input onChange={handleChange} id="confirmPassword" type="password" name="confirmPassword" placeholder="Confirm your Password" className="w-full border-1 border-gray-300 rounded-2xl p-3" />
           </div>
 
           <div className="flex">
-            <label className="flex text-sm text-gray-700">
-              <input type="checkbox" className="w-5 h-5" />
+            <input onChange={handleChange} id="termsAccept" type="checkbox" name="termsAccept" className="w-5 h-5" />
+            <label htmlFor="termsAccept" className="text-sm text-gray-700">
               <span className="ml-2">I agree to the
                 <NavLink to={'/policies/privacy'} className={'text-blue-600 hover:text-blue-700'}>&nbsp;Privacy Policy</NavLink>
               </span>
@@ -49,7 +94,7 @@ function Login() {
           </div>
           <button
             type="submit"
-
+            onClick={handleClick}
             className="text-white rounded-2xl p-3 bg-blue-600 hover:bg-blue-700 ">Create Account</button>
         </form>
       </div>
