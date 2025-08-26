@@ -1,30 +1,82 @@
-import { Request, Response } from "express";
+import { Request, Response, NextFunction } from "express";
+import { asyncHandler } from "../utils/asyncHandler";
+import { signUpService, loginService, logoutService } from "../services/auth.service";
+import { SignUpInput, LoginInput } from "../services/auth.service";
+import { env } from "../config/env";
 
-const signUp = async (req: Request, res: Response) => {
-    try {
-        console.log(req.body)
-        const { fullName, email, password } = req.body ?? {};
-        console.log(fullName, email, password)
 
-        res.send({
-            success: true,
-            status: 200,
-            message: "hellow susie you signed up!",
-            data: {
-                fullName,
-                email,
-                password
-            }
-        })
-        return
+const signUp = asyncHandler(async (req: Request<{}, {}, SignUpInput>, res: Response, next: NextFunction) => {
+    
+    const { fullName, email, username, password, confirmPassword, termsAccept} = req.body;
+
+    const {accessToken, refreshToken, newUser} = await signUpService({
+        fullName,
+        email,
+        username,
+        password,
+        confirmPassword,
+        termsAccept
+    })
+
+    res.status(201)
+    .cookie('refreshToken', refreshToken, {
+        httpOnly: env.httpOnlyCookie,
+        maxAge: 24 * 60 * 60 * 1000
+    })
+    .cookie(
+        'accessToken', accessToken, {
+            httpOnly: env.httpOnlyCookie,
+            maxAge: 24 * 60 * 60 * 1000
+        }
+    )
+    .send({
+        newUser
+    })    
+})
+
+const login = asyncHandler(async (req: Request<{}, {}, LoginInput>, res: Response, next: NextFunction) => {
+    
+    const { email, password } = req.body;
+
+    const {accessToken, refreshToken, user} = await loginService({
+        email,
+        password
+    })
+
+    res.status(201)
+    .cookie('refreshToken', refreshToken, {
+        httpOnly: env.httpOnlyCookie,
+        // maxAge: 24 * 60 * 60 * 1000
+    })
+    .cookie(
+        'accessToken', accessToken, {
+        httpOnly: env.httpOnlyCookie,
+        // maxAge: 24 * 60 * 60 * 1000
     }
-    catch (error) {
-        console.log(error);
-        res.send('fuck you')
-    }
-}
+    )
+    .send({
+        user
+    })  
+
+})
+
+
+const logout = asyncHandler(async (req: Request<{}, {}, string>, res: Response, next: NextFunction) => {
+       
+    const { refreshToken } = req.cookies;
+
+    await logoutService(refreshToken)
+
+    res.status(200)
+        .clearCookie('refreshToken')
+        .clearCookie('accessToken')
+        .send("user logged out successfully")
+})
+
 
 
 export default {
     signUp,
+    login,
+    logout
 }

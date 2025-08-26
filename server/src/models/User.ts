@@ -6,16 +6,16 @@ import { env } from "../config/env";
 // schema types 
 
 export interface IUser {
-  fullName: string,
-  email: string,
-  username: string,
-  password: string,
-  refreshToken: string,
-  termsAccept: boolean,
+  fullName: string
+  email: string
+  username: string
+  password: string
+  refreshToken: string
+  termsAccept: boolean
   userData: {
-    bio: string,
-    gender: string,
-    ageGroup: string,
+    bio: string
+    gender: string
+    ageGroup: string
     work: string
   },
 }
@@ -23,6 +23,7 @@ export interface IUser {
 export interface IUserDocument extends IUser, Document {
   _id: Types.ObjectId,
   isPasswordCorrect(password: string): Promise<boolean>;
+  verifyRefreshToken(refreshToken: string): Promise<boolean>;
   createAccessToken(): string;
   createRefreshToken(): string;
   generateTokens(): Promise<{ accessToken: string, refreshToken: string }>;
@@ -67,6 +68,10 @@ userSchema.method('isPasswordCorrect', async function (password: string) {
   return await bcrypt.compare(password, this.password)
 })
 
+userSchema.method('verifyRefreshToken', async function (refreshToken: string) {
+  return await bcrypt.compare(refreshToken, this.refreshToken)
+})
+
 userSchema.method('createAccessToken', function () {
   return jwt.sign(
     {
@@ -105,6 +110,14 @@ userSchema.pre('save', async function (next) {
   if (!this.isModified('password')) return next();
   const salt = await bcrypt.genSalt(10);
   this.password = await bcrypt.hash(this.password, salt);
+  next();
+})
+
+userSchema.pre('save', async function (next) {
+  if (!this.isModified('refreshToken')) return next();
+
+  const salt = await bcrypt.genSalt(10);
+  this.refreshToken = await bcrypt.hash(this.refreshToken, salt);
   next();
 })
 
