@@ -53,7 +53,7 @@ function Login() {
         <form action="submit" className="flex flex-col w-full gap-4 mt-10">
           <div>
             <label htmlFor="identifier" className="block text-sm font-medium text-gray-700 mb-1">
-              Email Address or username
+              Email Address or username <span aria-label="required">*</span>
             </label>
             <input onChange={handleChange} id="identifier" name="identifier" type="text" placeholder="Email or username" className="w-full border-1 border-gray-300 rounded-2xl p-3" />
           </div>
@@ -61,7 +61,7 @@ function Login() {
           <div>
             <div className="flex justify-between ">
               <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
-                Password
+                Password <span aria-label="required">*</span>
               </label>
               <NavLink to={"/auth/reset-password"} className={'text-sm text-blue-600 hover:text-blue-700'}>Forgot Password?</NavLink>
             </div>
