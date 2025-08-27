@@ -2,6 +2,20 @@ import { NavLink } from "react-router"
 import { useState } from "react"
 
 function Login() {
+  const [showPassword, setShowPassword] = useState({
+    password: false,
+    confirmPassword: false
+  })
+
+  const handleShowPassword = {
+    password: () => {
+      setShowPassword({ ...showPassword, password: !showPassword.password })
+    },
+    confirmPassword: () => {
+      setShowPassword({ ...showPassword, confirmPassword: !showPassword.confirmPassword })
+    }
+  }
+
 
   const [userData, setUserData] = useState({
     fullName: '',
@@ -16,13 +30,18 @@ function Login() {
     setUserData({ ...userData, [e.target.name]: e.target.value })
     if (e.target.name === 'termsAccept')
       setUserData({ ...userData, [e.target.name]: e.target.checked })
-
-
   }
 
   const handleClick = (e: React.FormEvent) => {
     e.preventDefault()
     console.log(userData)
+
+    if (userData.fullName === '' || userData.username === '' || userData.email === '' || userData.password === '' || userData.confirmPassword === ''){
+      alert('All fields are required')
+      return console.log('All fields are required')
+}
+    if (!userData.termsAccept)
+      return console.log('You must accept the terms and conditions')
 
     if (userData.password !== userData.confirmPassword)
       return console.log('passwords do not match')
@@ -52,40 +71,54 @@ function Login() {
         <form action="submit" className="flex flex-col w-full gap-4 mt-10">
           <div>
             <label htmlFor="fullName" className="block text-sm font-medium text-gray-700 mb-1">
-              Full Name
+              Full Name <span aria-label="required">*</span>
             </label>
-            <input onChange={handleChange} id="fullName" type="text" name="fullName" placeholder="Susie Chan" className="w-full border-1 border-gray-300 rounded-2xl p-3" />
-          </div>     
+            <input required onChange={handleChange} id="fullName" type="text" name="fullName" placeholder="Susie Chan" className="w-full border-1 border-gray-300 rounded-2xl p-3" />
+          </div>
           <div>
             <label htmlFor="username" className="block text-sm font-medium text-gray-700 mb-1">
-              username
+              username <span aria-label="required">*</span>
             </label>
-            <input onChange={handleChange} id="username" type="text" name="username" placeholder="susie.dev" className="w-full border-1 border-gray-300 rounded-2xl p-3" />
-          </div> 
+            <input required onChange={handleChange} id="username" type="text" name="username" placeholder="susie.dev" className="w-full border-1 border-gray-300 rounded-2xl p-3" />
+          </div>
           <div>
             <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-              Email Address
+              Email Address <span aria-label="required">*</span>
             </label>
-            <input onChange={handleChange} id="email" type="text" name="email" placeholder="your.email@example.com" className="w-full border-1 border-gray-300 rounded-2xl p-3" />
+            <input required onChange={handleChange} autoComplete="email" id="email" type="text" name="email" placeholder="your.email@example.com" className="w-full border-1 border-gray-300 rounded-2xl p-3" />
           </div>
 
           <div>
             <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
-              Password
+              Password <span aria-label="required">*</span>
             </label>
-            <input onChange={handleChange} id="password" type="password" name="password" placeholder="At least 8 characters" className="w-full border-1 border-gray-300 rounded-2xl p-3" />
+            <div className="relative flex items-center ">
+              <input required onChange={handleChange} autoComplete="password" id="password" name="password" type={showPassword.password ? "text" : "password"} placeholder="At least 8 characters" className="w-full border-1 border-gray-300 rounded-2xl p-3" />
+              <button
+                type="button"
+                onClick={handleShowPassword.password}
+                className="absolute right-0 pr-3 text-gray-500 hover:text-gray-600"
+              >-O-</button>
+            </div>
             {/* <p className="mt-1 text-xs text-gray-500">Must be at least 8 characters with uppercase, lowercase, and number</p> */}
           </div>
 
           <div>
             <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-1">
-              Confirm Password
+              Confirm Password <span aria-label="required">*</span>
             </label>
-            <input onChange={handleChange} id="confirmPassword" type="password" name="confirmPassword" placeholder="Confirm your Password" className="w-full border-1 border-gray-300 rounded-2xl p-3" />
+            <div className="relative flex items-center ">
+              <input required onChange={handleChange} autoComplete="password" id="confirmPassword" type={showPassword.confirmPassword ? "text" : "password"} name="confirmPassword" placeholder="Confirm your Password" className="w-full border-1 border-gray-300 rounded-2xl p-3" />
+              <button
+                type="button"
+                onClick={handleShowPassword.confirmPassword}
+                className="absolute right-0 pr-3 text-gray-500 hover:text-gray-600"
+              >-O-</button>
+            </div>
           </div>
 
           <div className="flex">
-            <input onChange={handleChange} id="termsAccept" type="checkbox" name="termsAccept" className="w-5 h-5" />
+            <input required onChange={handleChange} id="termsAccept" type="checkbox" name="termsAccept" className="w-5 h-5" />
             <label htmlFor="termsAccept" className="text-sm text-gray-700">
               <span className="ml-2">I agree to the
                 <NavLink to={'/policies/privacy'} className={'text-blue-600 hover:text-blue-700'}>&nbsp;Privacy Policy</NavLink>

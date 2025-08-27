@@ -2,6 +2,12 @@ import { useState } from "react"
 import { NavLink } from "react-router"
 
 function Login() {
+  const [showPassword, setShowPassword] = useState(false)
+
+  const handleShowPassword = () => {
+    setShowPassword(!showPassword)
+  }
+
   const [userData, setUserData] = useState({
     identifier: '',
     password: '',
@@ -15,18 +21,16 @@ function Login() {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setUserData({ ...userData, [e.target.name]: e.target.value })
 
-    
-
-
   }
 
   const handleClick = (e: React.FormEvent) => {
     e.preventDefault()
     console.log(userData)
 
-    if (userData.identifier === '' || userData.password === '')
-      return console.log('All fields are required')
-
+    if (userData.identifier === '' || userData.password === '') {
+      alert('All fields are required')
+      return console.log('All fields are required');
+    }
 
     fetch('http://localhost:5500/api/v1/auth/login', {
       method: 'POST',
@@ -55,7 +59,7 @@ function Login() {
             <label htmlFor="identifier" className="block text-sm font-medium text-gray-700 mb-1">
               Email Address or username <span aria-label="required">*</span>
             </label>
-            <input onChange={handleChange} id="identifier" name="identifier" type="text" placeholder="Email or username" className="w-full border-1 border-gray-300 rounded-2xl p-3" />
+            <input required onChange={handleChange} autoComplete="email" id="identifier" name="identifier" type="text" placeholder="Email or username" className="w-full border-1 border-gray-300 rounded-2xl p-3" />
           </div>
 
           <div>
@@ -65,9 +69,15 @@ function Login() {
               </label>
               <NavLink to={"/auth/reset-password"} className={'text-sm text-blue-600 hover:text-blue-700'}>Forgot Password?</NavLink>
             </div>
-            <input onChange={handleChange} id="password" name="password" type="password" placeholder="Password" className="w-full border-1 border-gray-300 rounded-2xl p-3" />
+            <div className="relative flex items-center ">
+              <input required onChange={handleChange} autoComplete="password" id="password" name="password" type={showPassword ? "text" : "password"} placeholder="Password" className="w-full border-1 border-gray-300 rounded-2xl p-3" />
+              <button
+                type="button"
+                onClick={handleShowPassword}
+                className="absolute right-0 pr-3 text-gray-500 hover:text-gray-600"
+              >-O-</button>
+            </div>
           </div>
-
 
           <div className="flex items-center text-sm text-gray-700">
             <input onChange={handleRememberMe} id="rememberMe" type="checkbox" className="w-5 h-5" />
