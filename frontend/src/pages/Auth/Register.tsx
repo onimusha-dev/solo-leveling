@@ -1,7 +1,8 @@
 import { NavLink } from "react-router"
 import { useState } from "react"
+import { IoMdEye, IoMdEyeOff } from "react-icons/io"
 
-function Login() {
+function Login() {  
   const [showPassword, setShowPassword] = useState({
     password: false,
     confirmPassword: false
@@ -34,7 +35,6 @@ function Login() {
 
   const handleClick = (e: React.FormEvent) => {
     e.preventDefault()
-    console.log(userData)
 
     if (userData.fullName === '' || userData.username === '' || userData.email === '' || userData.password === '' || userData.confirmPassword === ''){
       alert('All fields are required')
@@ -60,7 +60,7 @@ function Login() {
   }
 
   return (
-    <div className="flex flex-col md:flex-row gap-10 min-w-full bg-gray-100 p-10 rounded-2xl shadow-md">
+    <div className="flex flex-col md:flex-row gap-10 bg-gray-100 p-10 rounded-2xl shadow-md select-none">
 
       {/* section one  */}
 
@@ -73,7 +73,7 @@ function Login() {
             <label htmlFor="fullName" className="block text-sm font-medium text-gray-700 mb-1">
               Full Name <span aria-label="required">*</span>
             </label>
-            <input required onChange={handleChange} id="fullName" type="text" name="fullName" placeholder="Susie Chan" className="w-full border-1 border-gray-300 rounded-2xl p-3" />
+            <input autoFocus required onChange={handleChange} id="fullName" type="text" name="fullName" placeholder="Susie Chan" className="w-full border-1 border-gray-300 rounded-2xl p-3" />
           </div>
           <div>
             <label htmlFor="username" className="block text-sm font-medium text-gray-700 mb-1">
@@ -96,9 +96,10 @@ function Login() {
               <input required onChange={handleChange} autoComplete="password" id="password" name="password" type={showPassword.password ? "text" : "password"} placeholder="At least 8 characters" className="w-full border-1 border-gray-300 rounded-2xl p-3" />
               <button
                 type="button"
+                aria-label={showPassword.password ? 'hide password' : 'show password'}
                 onClick={handleShowPassword.password}
                 className="absolute right-0 pr-3 text-gray-500 hover:text-gray-600"
-              >-O-</button>
+              >{showPassword.password ? <IoMdEyeOff size={24} /> : <IoMdEye size={24} />}</button>
             </div>
             {/* <p className="mt-1 text-xs text-gray-500">Must be at least 8 characters with uppercase, lowercase, and number</p> */}
           </div>
@@ -111,9 +112,10 @@ function Login() {
               <input required onChange={handleChange} autoComplete="password" id="confirmPassword" type={showPassword.confirmPassword ? "text" : "password"} name="confirmPassword" placeholder="Confirm your Password" className="w-full border-1 border-gray-300 rounded-2xl p-3" />
               <button
                 type="button"
+                aria-label={showPassword?'hide password':'show password'}
                 onClick={handleShowPassword.confirmPassword}
                 className="absolute right-0 pr-3 text-gray-500 hover:text-gray-600"
-              >-O-</button>
+              >{showPassword.confirmPassword ? <IoMdEyeOff size={24} /> : <IoMdEye size={24} />}</button>
             </div>
           </div>
 
@@ -135,17 +137,6 @@ function Login() {
       {/* section two  */}
 
       <div className="flex flex-col items-center justify-between gap-8 w-full md:w-1/2 ">
-        <div className="hidden md:flex relative w-full h-full rounded-2xl shadow-md overflow-hidden bg-blue-500">
-          <div className="relative top-0 w-full h-full bg-gradient-to-r from-white via-blue-500 to-white animate-spin-slow opacity-50 blur-sm rounded-2xl "></div>
-
-          <div className="absolute top-0 flex items-center justify-center w-full h-full bg-gr ">
-            <img src="/friren.png"
-              alt="friren"
-              className="w-full h-full p-1 rounded-2xl shadow-md hover:transform hover:scale-105 transition-all duration-300 ease-in-out"
-            />
-          </div>
-        </div>
-
         <div>
           <div className="w-full">
             <hr className="relative text-gray-300 top-3" />
