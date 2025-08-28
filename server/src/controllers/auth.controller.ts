@@ -76,9 +76,9 @@ const logout = asyncHandler(async (req: Request<{}, {}, string>, res: Response, 
 // @note i need to think about the fact of preserved routes
 // shall i create a new validator or validate in the services lol
 
-const resetRefreshToken = asyncHandler(async (req: Request<{}, {}, string>, res: Response, next: NextFunction) => {
+const resetRefreshToken = asyncHandler(async (req: Request<{}, {}, { refreshToken: string }>, res: Response, next: NextFunction) => {
 
-    const { refreshToken } = req.cookies;
+    const { refreshToken } = req.user;
 
     refreshTokenService(refreshToken)
 
