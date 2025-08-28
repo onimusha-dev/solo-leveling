@@ -113,7 +113,13 @@ export const logoutService = async (refreshToken: string): Promise<void> => {
  * Refreshes the access token using the refresh token.
  *
  */
-export const refreshTokenService = async (refreshToken: string): Promise<void> => {
-    console.log("refresh token service got hit lol...")
+// This function handles the refresh token flow
+export const refreshTokenService = (refreshToken: string) => {
+    // ... refresh token logic ...
+    console.log(`${refreshToken} will be replaced here`)
+};
 
-}
+// This function generates your JWTs
+export const generateTokens = () => {
+    // ... token generation logic ...
+};

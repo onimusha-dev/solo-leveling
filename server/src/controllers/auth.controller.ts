@@ -22,12 +22,14 @@ const signUp = asyncHandler(async (req: Request<{}, {}, SignUpInput>, res: Respo
     res.status(201)
     .cookie('refreshToken', refreshToken, {
         httpOnly: env.httpOnlyCookie,
-        // maxAge: 24 * 60 * 60 * 1000
+        secure: env.secureCookie,
+        maxAge: 24 * 60 * 60 * 1000
     })
     .cookie(
         'accessToken', accessToken, {
             httpOnly: env.httpOnlyCookie,
-            // maxAge: 24 * 60 * 60 * 1000
+            secure: env.secureCookie,
+            maxAge: 24 * 60 * 60 * 1000
         }
     )
     .send({
@@ -47,12 +49,14 @@ const login = asyncHandler(async (req: Request<{}, {}, LoginInput>, res: Respons
     res.status(201)
     .cookie('refreshToken', refreshToken, {
         httpOnly: env.httpOnlyCookie,
-        // maxAge: 24 * 60 * 60 * 1000
+        secure: env.secureCookie,
+        maxAge: 24 * 60 * 60 * 1000
     })
     .cookie(
         'accessToken', accessToken, {
         httpOnly: env.httpOnlyCookie,
-        // maxAge: 24 * 60 * 60 * 1000
+        secure: env.secureCookie,
+        maxAge: 24 * 60 * 60 * 1000
     }
     )
     .send({
@@ -78,9 +82,9 @@ const logout = asyncHandler(async (req: Request<{}, {}, string>, res: Response, 
 
 const resetRefreshToken = asyncHandler(async (req: Request<{}, {}, { refreshToken: string }>, res: Response, next: NextFunction) => {
 
-    const { refreshToken } = req.user;
+    // const { refreshToken } = req.user;
 
-    refreshTokenService(refreshToken)
+    refreshTokenService("refreshToken")
 
     res.status(200)
         .cookie('refreshToken', "hi sexy")
