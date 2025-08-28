@@ -19,7 +19,7 @@ app.use(cors({
 
 // sasta logger for now
 app.use((req:any, res:any, next:any)=>{
-   console.log(`${req.method} ${req.path} ${req.body}`)
+   console.log(`${req.method} ${req.path} ${''}`)
    next()
 })
 

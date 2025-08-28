@@ -1,15 +1,10 @@
 import { env } from "../config/env";
-import { User, IUserDocument, IUser } from "../models/User";
+import { User, IUser } from "../models/User";
 import jwt from 'jsonwebtoken'
+import { SignUpInput } from "../validation/schema/user/create";
+import { LoginInput } from "../validation/schema/user/login";
 
-export interface SignUpInput {
-    fullName: string
-    username: string
-    email: string
-    password: string
-    confirmPassword: string
-    termsAccept: boolean
-}
+
 
 /**
  * Registers a new user account.
@@ -32,16 +27,9 @@ export interface SignUpInput {
  *  - terms are not accepted
  *  - user already exists (email/username taken)
  */
-
 export const signUpService = async (
     data: SignUpInput
 ): Promise<{ accessToken: string, refreshToken: string, newUser: Omit<IUser, "password" | "refreshToken"> }> => {
-    console.log(data.password, "   ", data.confirmPassword)
-    if (data.password !== data.confirmPassword)
-        throw new Error("Passwords do not match");
-
-    if (!data.termsAccept)
-        throw new Error("You must accept the terms and conditions");
 
     const user = await User.findOne({
         $or: [{ email: data.email }, { username: data.username }]
@@ -57,12 +45,6 @@ export const signUpService = async (
     const { password, refreshToken: _refreshToken, ...newUserObject } = newUser.toObject();
 
     return { accessToken, refreshToken, newUser: newUserObject };
-}
-
-
-export interface LoginInput {
-    identifier: string
-    password: string
 }
 
 /**
@@ -83,16 +65,12 @@ export interface LoginInput {
  *  - no matching user exists
  *  - password is incorrect
  */
-
 export const loginService = async (
     data: LoginInput
 ): Promise<{ accessToken: string, refreshToken: string, user: Omit<IUser, "password" | "refreshToken"> }> => {
-console.log(data)
-    if (!data.identifier)
-        throw new Error("Email or username is required");
 
     const isUser = await User.findOne(
-        {$or: ([ { email: data.identifier}, {username: data.identifier }])}
+        { $or: ([{ email: data.anotherField }, { username: data.anotherField }])}
     );
 
     if (!isUser)
@@ -115,9 +93,6 @@ console.log(data)
  */
 export const logoutService = async (refreshToken: string): Promise<void> => {
 
-    if (!refreshToken)
-        throw new Error("Refresh token is requred")
-
     const decodedToken = jwt.verify(refreshToken, env.refreshTokenCode) as { id: string };
 
     const user = await User.findById(decodedToken.id);
@@ -134,13 +109,11 @@ export const logoutService = async (refreshToken: string): Promise<void> => {
     return;
 }
 
-
-export interface RefreshTokenInput {
-    id: string
-    refreshToken: string
-}
-
 /**
  * Refreshes the access token using the refresh token.
  *
  */
+export const refreshTokenService = async (refreshToken: string): Promise<void> => {
+    console.log("refresh token service got hit lol...")
+
+}

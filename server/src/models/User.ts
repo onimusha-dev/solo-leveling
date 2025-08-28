@@ -35,11 +35,24 @@ export interface IUserModel extends Model<IUserDocument> {
 
 // creating schemas
 
-const userSchema = new Schema<IUserDocument, IUserModel>  (
+const userSchema = new Schema<IUserDocument, IUserModel>(
   {
     fullName: { type: String, required: true, trim: true },
-    email: { type: String, required: true, unique: true, trim: true, lowercase: true },
-    username: { type: String, required: true, unique: true, trim: true, lowercase: true },
+    email: {
+      type: String,
+      required: true,
+      unique: true,
+      trim: true,
+      lowercase: true,
+      match: /^\S + @\S +\.\S + $ /,
+    },
+    username: {
+      type: String, required: true,
+      unique: true,
+      trim: true,
+      lowercase: true,
+      match: /^[a-zA-Z0-9_]+$/
+    },
     password: { type: String, required: true },
     refreshToken: { type: String, default: '' },
     termsAccept: { type: Boolean, default: false },

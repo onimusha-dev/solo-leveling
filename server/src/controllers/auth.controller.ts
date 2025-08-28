@@ -1,7 +1,8 @@
 import { Request, Response, NextFunction } from "express";
 import { asyncHandler } from "../utils/asyncHandler";
-import { signUpService, loginService, logoutService } from "../services/auth.service";
-import { SignUpInput, LoginInput } from "../services/auth.service";
+import { signUpService, loginService, logoutService, refreshTokenService } from "../services/auth.service";
+import { SignUpInput} from "../validation/schema/user/create";
+import { LoginInput } from "../validation/schema/user/login";
 import { env } from "../config/env";
 
 
@@ -21,12 +22,12 @@ const signUp = asyncHandler(async (req: Request<{}, {}, SignUpInput>, res: Respo
     res.status(201)
     .cookie('refreshToken', refreshToken, {
         httpOnly: env.httpOnlyCookie,
-        maxAge: 24 * 60 * 60 * 1000
+        // maxAge: 24 * 60 * 60 * 1000
     })
     .cookie(
         'accessToken', accessToken, {
             httpOnly: env.httpOnlyCookie,
-            maxAge: 24 * 60 * 60 * 1000
+            // maxAge: 24 * 60 * 60 * 1000
         }
     )
     .send({
@@ -36,10 +37,10 @@ const signUp = asyncHandler(async (req: Request<{}, {}, SignUpInput>, res: Respo
 
 const login = asyncHandler(async (req: Request<{}, {}, LoginInput>, res: Response, next: NextFunction) => {
     
-    const { identifier, password } = req.body;
+    const { anotherField, password } = req.body;
 
     const {accessToken, refreshToken, user} = await loginService({
-        identifier,
+        anotherField,
         password
     })
 
@@ -60,7 +61,6 @@ const login = asyncHandler(async (req: Request<{}, {}, LoginInput>, res: Respons
 
 })
 
-
 const logout = asyncHandler(async (req: Request<{}, {}, string>, res: Response, next: NextFunction) => {
        
     const { refreshToken } = req.cookies;
@@ -73,10 +73,26 @@ const logout = asyncHandler(async (req: Request<{}, {}, string>, res: Response, 
         .send("user logged out successfully")
 })
 
+// @note i need to think about the fact of preserved routes
+// shall i create a new validator or validate in the services lol
+
+const resetRefreshToken = asyncHandler(async (req: Request<{}, {}, string>, res: Response, next: NextFunction) => {
+
+    const { refreshToken } = req.cookies;
+
+    refreshTokenService(refreshToken)
+
+    res.status(200)
+        .cookie('refreshToken', "hi sexy")
+        .cookie('accessToken', "hi sexy")
+        .send("refresh token reset successfully")
+})
 
 
 export default {
     signUp,
     login,
-    logout
+    logout,
+    resetRefreshToken
+
 }
