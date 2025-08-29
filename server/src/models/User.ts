@@ -44,14 +44,15 @@ const userSchema = new Schema<IUserDocument, IUserModel>(
       unique: true,
       trim: true,
       lowercase: true,
-      match: /^\S + @\S +\.\S + $ /,
+      // match: /^\S + @\S +\.\S + $ /,
     },
     username: {
       type: String, required: true,
       unique: true,
       trim: true,
       lowercase: true,
-      match: /^[a-zA-Z0-9_]+$/
+      // match: /^[a-zA-Z0-9_]+$/
+      
     },
     password: { type: String, required: true },
     refreshToken: { type: String, default: '' },

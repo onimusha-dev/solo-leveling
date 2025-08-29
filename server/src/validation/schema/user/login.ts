@@ -1,6 +1,6 @@
 import * as z from "zod"
 
-const emailSchema = z.email()
+const emailSchema = z.string().email()
 
 const usernameSchema = z.string()
     .trim()
