@@ -116,8 +116,12 @@ export const loginService = async (
     data: LoginInput
 ): Promise<{ accessToken: string, refreshToken: string, user: Omit<IUser, "password" | "refreshToken"> }> => {
 
+    // @TODO: this needs some optimisation as db needs to look for both field 
+    // even if only one is valid, planning to modify this input in the zod schema 
+    // then add some conditions here
+    
     const isUser = await User.findOne(
-        { $or: ([{ email: data.authorField }, { username: data.authorField }])}
+        { $or: ([{ email: data.emailOrUsername }, { username: data.emailOrUsername }])}
     );
 
     if (!isUser)

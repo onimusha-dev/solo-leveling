@@ -39,10 +39,10 @@ const signUp = asyncHandler(async (req: Request<{}, {}, SignUpInput>, res: Respo
 
 const login = asyncHandler(async (req: Request<{}, {}, LoginInput>, res: Response, next: NextFunction) => {
     
-    const { authorField, password } = req.body;
+    const { emailOrUsername, password } = req.body;
 
     const {accessToken, refreshToken, user} = await loginService({
-        authorField,
+        emailOrUsername,
         password
     })
 
