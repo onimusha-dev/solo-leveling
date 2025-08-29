@@ -1,10 +1,57 @@
 import { env } from "../config/env";
-import { User, IUser } from "../models/User";
+import { User, IUser, IUserDocument } from "../models/User";
 import jwt from 'jsonwebtoken'
 import { SignUpInput } from "../validation/schema/user/create";
 import { LoginInput } from "../validation/schema/user/login";
+import bcrypt from "bcrypt";
 
 
+
+const generateTokens = async (user: IUserDocument) => {
+
+    const accessToken = createAccessToken(user);
+    const refreshToken = createRefreshToken(user);
+
+    user.refreshToken = refreshToken;
+    await user.save();
+    return { accessToken, refreshToken };
+}
+/**
+ * Verifies whether a given refresh token matches the hashed refresh token
+ * stored in the user document.
+ *
+ * @param refreshToken - The plain-text refresh token to verify.
+ * @param user - A Mongoose user document containing the hashed refresh token.
+ * @returns A promise that resolves to `true` if the tokens match, otherwise `false`.
+ */
+const verifyRefreshToken = async (refreshToken: string, user: IUserDocument) => {
+    return await bcrypt.compare(refreshToken, user.refreshToken);
+};
+
+const createAccessToken = (user: IUserDocument): string => {
+    return jwt.sign(
+        {
+            id: user._id,
+        },
+        env.accessTokenCode,
+        {
+            expiresIn: env.accessTokenExpiry
+        }
+    )
+}
+const createRefreshToken = (user: IUserDocument): string => {
+    return jwt.sign(
+        {
+            id: user._id,
+            email: user.email,
+            username: user.username
+        },
+        env.refreshTokenCode,
+        {
+            expiresIn: env.refreshTokenExpiry
+        }
+    )
+}
 
 /**
  * Registers a new user account.
@@ -40,7 +87,7 @@ export const signUpService = async (
 
     let newUser = new User(data);
 
-    const { accessToken, refreshToken } = await newUser.generateTokens();
+    const { accessToken, refreshToken } = await generateTokens(newUser);
 
     const { password, refreshToken: _refreshToken, ...newUserObject } = newUser.toObject();
 
@@ -70,7 +117,7 @@ export const loginService = async (
 ): Promise<{ accessToken: string, refreshToken: string, user: Omit<IUser, "password" | "refreshToken"> }> => {
 
     const isUser = await User.findOne(
-        { $or: ([{ email: data.anotherField }, { username: data.anotherField }])}
+        { $or: ([{ email: data.authorField }, { username: data.authorField }])}
     );
 
     if (!isUser)
@@ -81,7 +128,7 @@ export const loginService = async (
     if (!isPasswordCorrect)
         throw new Error("Incorrect password");
 
-    const { accessToken, refreshToken } = await isUser.generateTokens();
+    const { accessToken, refreshToken } = await generateTokens(isUser);
 
     const { password, refreshToken: _refreshToken, ...newUserObject } = isUser.toObject();
 
@@ -100,7 +147,7 @@ export const logoutService = async (refreshToken: string): Promise<void> => {
     if (!user)
         throw new Error("User not found");
 
-    const isVerified = await user.verifyRefreshToken(refreshToken);
+    const isVerified = await verifyRefreshToken(refreshToken, user);
 
     if (!isVerified)
         throw new Error("Invalid refresh token");
@@ -117,9 +164,4 @@ export const logoutService = async (refreshToken: string): Promise<void> => {
 export const refreshTokenService = (refreshToken: string) => {
     // ... refresh token logic ...
     console.log(`${refreshToken} will be replaced here`)
-};
-
-// This function generates your JWTs
-export const generateTokens = () => {
-    // ... token generation logic ...
 };

@@ -12,7 +12,7 @@ const passwordSchema = z.string().min(8).max(16)
 
 
 const loginSchema = z.object({
-    anotherField: z.union([emailSchema, usernameSchema]),
+    authorField: z.union([emailSchema, usernameSchema]),
     password: passwordSchema
 })
 

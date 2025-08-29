@@ -23,19 +23,11 @@ export interface IUser {
 export interface IUserDocument extends IUser, Document {
   _id: Types.ObjectId,
   isPasswordCorrect(password: string): Promise<boolean>;
-  verifyRefreshToken(refreshToken: string): Promise<boolean>;
-  createAccessToken(): string;
-  createRefreshToken(): string;
-  generateTokens(): Promise<{ accessToken: string, refreshToken: string }>;
 }
 
-export interface IUserModel extends Model<IUserDocument> {
-  isUser(): Promise<boolean>;
-}
+// @notes: creating schemas
 
-// creating schemas
-
-const userSchema = new Schema<IUserDocument, IUserModel>(
+const userSchema = new Schema<IUserDocument, Model<IUserDocument>>(
   {
     fullName: { type: String, required: true, trim: true },
     email: {
@@ -82,46 +74,10 @@ userSchema.method('isPasswordCorrect', async function (password: string) {
   return await bcrypt.compare(password, this.password)
 })
 
-userSchema.method('verifyRefreshToken', async function (refreshToken: string) {
-  return await bcrypt.compare(refreshToken, this.refreshToken)
-})
-
-userSchema.method('createAccessToken', function () {
-  return jwt.sign(
-    {
-      id: this._id,
-    },
-    env.accessTokenCode,
-    {
-      expiresIn: env.accessTokenExpiry
-    }
-  )
-})
-
-userSchema.method('createRefreshToken', function () {
-  return jwt.sign(
-    {
-      id: this._id,
-      email: this.email,
-      username: this.username
-    },
-    env.refreshTokenCode,
-    {
-      expiresIn: env.refreshTokenExpiry
-    }
-  )
-})
-
-userSchema.method('generateTokens', async function () {
-  const accessToken = this.createAccessToken();
-  const refreshToken = this.createRefreshToken();
-  this.refreshToken = refreshToken;
-  await this.save();
-  return { accessToken, refreshToken };
-})
 
 userSchema.pre('save', async function (next) {
   if (!this.isModified('password')) return next();
+
   const salt = await bcrypt.genSalt(10);
   this.password = await bcrypt.hash(this.password, salt);
   next();
@@ -135,6 +91,4 @@ userSchema.pre('save', async function (next) {
   next();
 })
 
-userSchema.statics.isUser = () => true
-
-export const User = model<IUserDocument, IUserModel>("User", userSchema)
+export const User = model<IUserDocument, Model<IUserDocument>>("User", userSchema)
