@@ -23,7 +23,7 @@ app.use((req:any, res:any, next:any)=>{
    next()
 })
 
-app.get('/', (req, res) => {
+app.get('/health', (req, res) => {
    res.send("hellow susie!")
 })
 

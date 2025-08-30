@@ -7,7 +7,11 @@ import bcrypt from "bcrypt";
 
 
 
-const generateTokens = async (user: IUserDocument) => {
+export const generateTokens = async (id: string) => {
+
+    const user = await User.findById(id);
+    if (!user)
+        throw new Error("User not found");
 
     const accessToken = createAccessToken(user);
     const refreshToken = createRefreshToken(user);
@@ -76,7 +80,7 @@ const createRefreshToken = (user: IUserDocument): string => {
  */
 export const signUpService = async (
     data: SignUpInput
-): Promise<{ accessToken: string, refreshToken: string, newUser: Omit<IUser, "password" | "refreshToken"> }> => {
+): Promise<{ newUser: Omit<IUser, "password" | "refreshToken"> }> => {
 
     const user = await User.findOne({
         $or: [{ email: data.email }, { username: data.username }]
@@ -87,11 +91,9 @@ export const signUpService = async (
 
     let newUser = new User(data);
 
-    const { accessToken, refreshToken } = await generateTokens(newUser);
-
     const { password, refreshToken: _refreshToken, ...newUserObject } = newUser.toObject();
 
-    return { accessToken, refreshToken, newUser: newUserObject };
+    return { newUser: newUserObject };
 }
 
 /**
@@ -114,7 +116,7 @@ export const signUpService = async (
  */
 export const loginService = async (
     data: LoginInput
-): Promise<{ accessToken: string, refreshToken: string, user: Omit<IUser, "password" | "refreshToken"> }> => {
+): Promise<{ user: Omit<IUser, "password" | "refreshToken"> }> => {
 
     // @TODO: this needs some optimisation as db needs to look for both field 
     // even if only one is valid, planning to modify this input in the zod schema 
@@ -132,11 +134,9 @@ export const loginService = async (
     if (!isPasswordCorrect)
         throw new Error("Incorrect password");
 
-    const { accessToken, refreshToken } = await generateTokens(isUser);
-
     const { password, refreshToken: _refreshToken, ...newUserObject } = isUser.toObject();
 
-    return { accessToken, refreshToken, user: newUserObject };
+    return { user: newUserObject };
 }
 
 /**

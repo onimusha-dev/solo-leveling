@@ -1,16 +1,16 @@
 import { Request, Response, NextFunction } from "express";
 import { asyncHandler } from "../utils/asyncHandler";
 import { signUpService, loginService, logoutService, refreshTokenService } from "../services/auth.service";
-import { SignUpInput} from "../validation/schema/user/create";
+import { SignUpInput } from "../validation/schema/user/create";
 import { LoginInput } from "../validation/schema/user/login";
 import { env } from "../config/env";
 
 
 const signUp = asyncHandler(async (req: Request<{}, {}, SignUpInput>, res: Response, next: NextFunction) => {
-    
-    const { fullName, email, username, password, confirmPassword, termsAccept} = req.body;
 
-    const {accessToken, refreshToken, newUser} = await signUpService({
+    const { fullName, email, username, password, confirmPassword, termsAccept } = req.body;
+
+    const { newUser } = await signUpService({
         fullName,
         email,
         username,
@@ -20,54 +20,57 @@ const signUp = asyncHandler(async (req: Request<{}, {}, SignUpInput>, res: Respo
     })
 
     res.status(201)
-    .cookie('refreshToken', refreshToken, {
-        httpOnly: env.httpOnlyCookie,
-        secure: env.secureCookie,
-        maxAge: 24 * 60 * 60 * 1000
-    })
-    .cookie(
-        'accessToken', accessToken, {
-            httpOnly: env.httpOnlyCookie,
-            secure: env.secureCookie,
-            maxAge: 24 * 60 * 60 * 1000
-        }
-    )
-    .send({
-        newUser
-    })    
+        // .cookie('refreshToken', refreshToken, {
+        //     httpOnly: env.httpOnlyCookie,
+        //     secure: env.secureCookie,
+        //     maxAge: 24 * 60 * 60 * 1000
+        // })
+        // .cookie(
+        //     'accessToken', accessToken, {
+        //         httpOnly: env.httpOnlyCookie,
+        //         secure: env.secureCookie,
+        //         maxAge: 24 * 60 * 60 * 1000
+        //     }
+        // )
+        .send({
+            newUser
+        })
 })
 
 const login = asyncHandler(async (req: Request<{}, {}, LoginInput>, res: Response, next: NextFunction) => {
-    
+
     const { emailOrUsername, password } = req.body;
 
-    const {accessToken, refreshToken, user} = await loginService({
+    const { user } = await loginService({
         emailOrUsername,
         password
     })
 
     res.status(201)
-    .cookie('refreshToken', refreshToken, {
-        httpOnly: env.httpOnlyCookie,
-        secure: env.secureCookie,
-        maxAge: 24 * 60 * 60 * 1000
-    })
-    .cookie(
-        'accessToken', accessToken, {
-        httpOnly: env.httpOnlyCookie,
-        secure: env.secureCookie,
-        maxAge: 24 * 60 * 60 * 1000
-    }
-    )
-    .send({
-        user
-    })  
-
+        // .cookie('refreshToken', refreshToken, {
+        //     httpOnly: env.httpOnlyCookie,
+        //     secure: env.secureCookie,
+        //     maxAge: 24 * 60 * 60 * 1000
+        // })
+        // .cookie(
+        //     'accessToken', accessToken, {
+        //     httpOnly: env.httpOnlyCookie,
+        //     secure: env.secureCookie,
+        //     maxAge: 24 * 60 * 60 * 1000
+        // }
+        // )
+        .send({
+            user
+        })
 })
 
 const logout = asyncHandler(async (req: Request<{}, {}, string>, res: Response, next: NextFunction) => {
-       
+
     const { refreshToken } = req.cookies;
+    if (!refreshToken) {
+        res.send("No refresh token provided")
+        throw new Error("No refresh token provided")
+    }
 
     await logoutService(refreshToken)
 
