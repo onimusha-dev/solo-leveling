@@ -5,11 +5,12 @@ import { env } from "../config/env";
 export const otpVerify = async (req: Request, res: Response, next: NextFunction) => {
     const otp = req.body.otp; // get input otp from req.body
 
+    if (!otp)
+        throw new Error("OTP is required")
 
     console.log("otp verify controller called")
 
     const { accessToken, refreshToken } = await otpVerifyService(req.body.otp)
-
 
     res.status(201)
         .cookie('refreshToken', refreshToken, {

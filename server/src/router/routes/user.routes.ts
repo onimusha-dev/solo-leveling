@@ -10,10 +10,10 @@ const userRouter = Router()
 
 userRouter
     .post('otp/verify', otpVerify)
-    .post('/signin', validator(signUpSchema), authController.signUp)
-    .post('/login', validator(loginSchema), authController.login)
+    .post('/signin',  authController.signUp)
+    .post('/login',  authController.login)
     .post('/logout', authController.logout)
     .post('/refresh', authController.resetRefreshToken)
-
-
+// validator(signUpSchema),
+// validator(loginSchema),
 export default userRouter;

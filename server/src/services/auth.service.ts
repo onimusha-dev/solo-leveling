@@ -57,30 +57,11 @@ const createRefreshToken = (user: IUserDocument): string => {
     )
 }
 
-/**
- * Registers a new user account.
- *
- * @param data - User input:
- *  - fullName: user's full name
- *  - username: unique username
- *  - email: unique email
- *  - password: chosen password
- *  - confirmPassword: must match `password`
- *  - termsAccept: must be true to accept T&Cs
- *
- * @returns Object containing:
- *  - accessToken: short-lived JWT for requests
- *  - refreshToken: long-lived JWT stored in DB
- *  - newUser: the created user without password/refreshToken
- *
- * @throws Error if:
- *  - passwords do not match
- *  - terms are not accepted
- *  - user already exists (email/username taken)
- */
+// @NOTE: user account related part
+
 export const signUpService = async (
     data: SignUpInput
-): Promise<{ newUser: Omit<IUser, "password" | "refreshToken"> }> => {
+): Promise<Omit<IUser, "password" | "refreshToken"> > => {
 
     const user = await User.findOne({
         $or: [{ email: data.email }, { username: data.username }]
@@ -89,34 +70,16 @@ export const signUpService = async (
     if (user)
         throw new Error("User already exists");
 
-    let newUser = new User(data);
+    const newUser = await User.create(data);
 
     const { password, refreshToken: _refreshToken, ...newUserObject } = newUser.toObject();
 
-    return { newUser: newUserObject };
+    return newUserObject;
 }
 
-/**
- * Logs in an existing user by email or username.
- *
- * @param data - Login input:
- *  - email: optional, used to find the user
- *  - username: optional, alternative to email
- *  - password: required, must match stored hash
- *
- * @returns Object containing:
- *  - accessToken: short-lived JWT for requests
- *  - refreshToken: long-lived JWT stored in DB
- *  - user: the logged-in user without password/refreshToken
- *
- * @throws Error if:
- *  - neither email nor username is provided
- *  - no matching user exists
- *  - password is incorrect
- */
 export const loginService = async (
     data: LoginInput
-): Promise<{ user: Omit<IUser, "password" | "refreshToken"> }> => {
+): Promise< Omit<IUser, "password" | "refreshToken">> => {
 
     // @TODO: this needs some optimisation as db needs to look for both field 
     // even if only one is valid, planning to modify this input in the zod schema 
@@ -136,12 +99,9 @@ export const loginService = async (
 
     const { password, refreshToken: _refreshToken, ...newUserObject } = isUser.toObject();
 
-    return { user: newUserObject };
+    return  newUserObject;
 }
 
-/**
- * Logout user and remove refreshToken from DB
- */
 export const logoutService = async (refreshToken: string): Promise<void> => {
 
     const decodedToken = jwt.verify(refreshToken, env.refreshTokenCode) as { id: string };

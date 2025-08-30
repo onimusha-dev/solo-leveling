@@ -4,13 +4,14 @@ import { signUpService, loginService, logoutService, refreshTokenService } from 
 import { SignUpInput } from "../validation/schema/user/create";
 import { LoginInput } from "../validation/schema/user/login";
 import { env } from "../config/env";
+import { sendOtpService } from "../services/otp.service";
 
 
 const signUp = asyncHandler(async (req: Request<{}, {}, SignUpInput>, res: Response, next: NextFunction) => {
 
     const { fullName, email, username, password, confirmPassword, termsAccept } = req.body;
 
-    const { newUser } = await signUpService({
+    const newUser = await signUpService({
         fullName,
         email,
         username,
@@ -19,48 +20,29 @@ const signUp = asyncHandler(async (req: Request<{}, {}, SignUpInput>, res: Respo
         termsAccept
     })
 
-    res.status(201)
-        // .cookie('refreshToken', refreshToken, {
-        //     httpOnly: env.httpOnlyCookie,
-        //     secure: env.secureCookie,
-        //     maxAge: 24 * 60 * 60 * 1000
-        // })
-        // .cookie(
-        //     'accessToken', accessToken, {
-        //         httpOnly: env.httpOnlyCookie,
-        //         secure: env.secureCookie,
-        //         maxAge: 24 * 60 * 60 * 1000
-        //     }
-        // )
-        .send({
-            newUser
-        })
+    sendOtpService(newUser)
+
+    res.status(201).send({
+        newUser,
+        "message": "User created successfully"
+    })
 })
 
 const login = asyncHandler(async (req: Request<{}, {}, LoginInput>, res: Response, next: NextFunction) => {
 
     const { emailOrUsername, password } = req.body;
 
-    const { user } = await loginService({
+    const user = await loginService({
         emailOrUsername,
         password
     })
 
+    sendOtpService(user)
+
     res.status(201)
-        // .cookie('refreshToken', refreshToken, {
-        //     httpOnly: env.httpOnlyCookie,
-        //     secure: env.secureCookie,
-        //     maxAge: 24 * 60 * 60 * 1000
-        // })
-        // .cookie(
-        //     'accessToken', accessToken, {
-        //     httpOnly: env.httpOnlyCookie,
-        //     secure: env.secureCookie,
-        //     maxAge: 24 * 60 * 60 * 1000
-        // }
-        // )
         .send({
-            user
+            user,
+            "message": "User logged in successfully"
         })
 })
 
