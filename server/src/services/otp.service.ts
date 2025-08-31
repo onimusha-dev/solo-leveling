@@ -7,6 +7,14 @@ import { IUser } from "../models/User";
 import crypto from "crypto"
 
 
+const isOtpValid = async (otp: string): Promise<boolean> => {
+    const otpDoc = await Otp.findOne({ otp })
+    if (!otpDoc || otpDoc.expiresAt < new Date())
+        return false
+    return true
+}
+
+
 // @NOTE: this is for generating the otp 
 const generateOTP = (length = 6) => {
     const digits = "0123456789";
@@ -20,8 +28,19 @@ const generateOTP = (length = 6) => {
 }
 
 // @:NOTE: for generating otp message and send it to the user
-export const sendOtpService = async (user: Omit<IUser, "password" | "refreshToken">) => {
+export const sendOtpService = async (user: Omit<IUser, "password" | "refreshToken"> & { id: string }) => {
     const otp = generateOTP()
+
+    const otpDoc = await Otp.create(
+        {
+            userId: user.id,  // <— required
+            otp: otp,
+            expiry: new Date(Date.now() + 5 * 60 * 1000)
+        }
+    )
+
+    if (!otpDoc)
+        throw new Error("something went wrong, try again!")
 
     const info = await transporter.sendMail({
         from: `Solo Leveling <${env.smtpUser}>`,
@@ -58,12 +77,12 @@ export const otpVerifyService = async (otp: string)
     console.log("otp verify service called")
 
     const otpDoc = await Otp.findOne({ otp })
-    const isOtpValid = await otpDoc?.isOtpValid(otp)
-    if (!isOtpValid)
-        throw new Error("Invalid OTP")
-    
     if (!otpDoc)
         throw new Error("Invalid OTP")
+
+    const isValod = await isOtpValid(otp)
+    if (!isValod)
+        throw new Error("OTP has expired")
 
     const delepedOtp = await Otp.findByIdAndDelete({ otp })
     if (!delepedOtp)

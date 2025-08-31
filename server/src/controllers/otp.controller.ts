@@ -3,6 +3,7 @@ import { otpVerifyService } from "../services/otp.service";
 import { env } from "../config/env";
 
 export const otpVerify = async (req: Request, res: Response, next: NextFunction) => {
+try {
     const otp = req.body.otp; // get input otp from req.body
 
     if (!otp)
@@ -28,4 +29,7 @@ export const otpVerify = async (req: Request, res: Response, next: NextFunction)
         .send({
             "message": "OTP verified successfully"
         })
+} catch (error) {
+    console.log(error)
+}
 }

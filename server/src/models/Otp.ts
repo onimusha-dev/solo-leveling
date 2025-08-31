@@ -5,7 +5,6 @@ export interface IOtp extends Document {
     userId: Types.ObjectId
     otp: string
     expiresAt: Date
-    isOtpValid(otp: string): Promise<boolean>
 }
 
 const otpSchema = new Schema<IOtp>({
@@ -24,13 +23,6 @@ const otpSchema = new Schema<IOtp>({
         expires: 300
     }
 })
-
-otpSchema.methods.isOtpValid = async function (otp: string): Promise<boolean> {
-    const otpMatched = await bcrypt.compare(otp, this.otp)
-    if (!otpMatched || this.expiresAt < new Date())
-        return false
-    return true
-}
 
 otpSchema.pre('save', async function (next) {
      const salt = await bcrypt.genSalt(10);

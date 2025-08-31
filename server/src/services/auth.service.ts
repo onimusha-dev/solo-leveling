@@ -61,7 +61,7 @@ const createRefreshToken = (user: IUserDocument): string => {
 
 export const signUpService = async (
     data: SignUpInput
-): Promise<Omit<IUser, "password" | "refreshToken"> > => {
+): Promise<Omit<IUser, "password" | "refreshToken"> & { id: string }> => {
 
     const user = await User.findOne({
         $or: [{ email: data.email }, { username: data.username }]
@@ -74,19 +74,19 @@ export const signUpService = async (
 
     const { password, refreshToken: _refreshToken, ...newUserObject } = newUser.toObject();
 
-    return newUserObject;
+    return { id: newUser._id.toString(), ...newUserObject };
 }
 
 export const loginService = async (
     data: LoginInput
-): Promise< Omit<IUser, "password" | "refreshToken">> => {
+): Promise<Omit<IUser, "password" | "refreshToken"> & { id: string }> => {
 
     // @TODO: this needs some optimisation as db needs to look for both field 
     // even if only one is valid, planning to modify this input in the zod schema 
     // then add some conditions here
-    
+
     const isUser = await User.findOne(
-        { $or: ([{ email: data.emailOrUsername }, { username: data.emailOrUsername }])}
+        { $or: ([{ email: data.emailOrUsername }, { username: data.emailOrUsername }]) }
     );
 
     if (!isUser)
@@ -99,7 +99,7 @@ export const loginService = async (
 
     const { password, refreshToken: _refreshToken, ...newUserObject } = isUser.toObject();
 
-    return  newUserObject;
+    return { id: isUser._id.toString(), ...newUserObject };
 }
 
 export const logoutService = async (refreshToken: string): Promise<void> => {
