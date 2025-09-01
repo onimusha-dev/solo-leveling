@@ -62,19 +62,33 @@ const logout = asyncHandler(async (req: Request<{}, {}, string>, res: Response, 
         .send("user logged out successfully")
 })
 
-// @note i need to think about the fact of preserved routes
-// shall i create a new validator or validate in the services lol
+const resetRefreshToken = asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
 
-const resetRefreshToken = asyncHandler(async (req: Request<{}, {}, { refreshToken: string }>, res: Response, next: NextFunction) => {
+    const token = req.cookies.refreshToken || req.header('Authorization')?.replace('Bearer ', '');
 
-    // const { refreshToken } = req.user;
+    if (!token) {
+        return res.status(401)
+            .json({
+                "message": "No refresh token provided"
+            })
+    }
+    const { accessToken, refreshToken } = await refreshTokenService(token)
 
-    refreshTokenService("refreshToken")
+    return res.status(200)
+        .cookie('accessToken', accessToken, {
+            httpOnly: env.httpOnlyCookie,
+            secure: env.secureCookie,
+            maxAge: 24 * 60 * 60 * 1000
+        })
+        .cookie('refreshToken', refreshToken, {
+            httpOnly: env.httpOnlyCookie,
+            secure: env.secureCookie,
+            maxAge: 24 * 60 * 60 * 1000
+        })
+        .json({
+            "message": "Access token refreshed successfully"
+        })
 
-    res.status(200)
-        .cookie('refreshToken', "hi sexy")
-        .cookie('accessToken', "hi sexy")
-        .send("refresh token reset successfully")
 })
 
 
@@ -83,5 +97,5 @@ export default {
     login,
     logout,
     resetRefreshToken
-
+    
 }

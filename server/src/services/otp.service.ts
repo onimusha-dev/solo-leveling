@@ -23,10 +23,6 @@ const createAndStoreOtpInDatabase = async (userId: string) => {
 
     const otp = generateOTP()
     const sessionId = crypto.randomUUID()
-    // const oldOtpDeleted = await Otp.deleteMany({ sessionId: sessionId })
-
-    // if (!oldOtpDeleted)
-    //     throw new Error("something went wrong, try again!")
 
     const otpDoc = await Otp.create(
         {

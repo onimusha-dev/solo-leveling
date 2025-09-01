@@ -121,11 +121,29 @@ export const logoutService = async (refreshToken: string): Promise<void> => {
 }
 
 /**
- * Refreshes the access token using the refresh token.
- *
+ * Generates a new access token if a valid refresh token is provided.
+ * @param refreshToken - The user's refresh token.
+ * @returns A new access token.
+ * @throws Error if the refresh token is invalid or expired.
  */
-// This function handles the refresh token flow
-export const refreshTokenService = (refreshToken: string) => {
-    // ... refresh token logic ...
-    console.log(`${refreshToken} will be replaced here`)
+
+export const refreshTokenService = async (token: string)
+    : Promise<{ accessToken: string, refreshToken: string }> => {
+
+    const decodedToken = jwt.verify(token, env.refreshTokenCode) as { id: string };
+
+    const user = await User.findById(decodedToken.id);
+    if (!user) {
+        throw new Error("User not found.");
+    }
+
+    const isTokenValid = await verifyRefreshToken(token, user);
+    if (!isTokenValid) {
+        throw new Error("Refresh token is invalid or has been revoked.");
+    }
+
+    const {accessToken, refreshToken} = await generateTokens(user.id);
+
+
+    return { accessToken, refreshToken };
 };
