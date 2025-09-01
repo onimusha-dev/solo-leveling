@@ -6,8 +6,7 @@ import { LoginInput } from "../validation/schema/user/login";
 import bcrypt from "bcrypt";
 
 
-
-export const generateTokens = async (id: string) => {
+export const generateTokens = async (id: string): Promise<{ accessToken: string, refreshToken: string }> => {
 
     const user = await User.findById(id);
     if (!user)
@@ -28,7 +27,7 @@ export const generateTokens = async (id: string) => {
  * @param user - A Mongoose user document containing the hashed refresh token.
  * @returns A promise that resolves to `true` if the tokens match, otherwise `false`.
  */
-const verifyRefreshToken = async (refreshToken: string, user: IUserDocument) => {
+const verifyRefreshToken = async (refreshToken: string, user: IUserDocument): Promise<boolean> => {
     return await bcrypt.compare(refreshToken, user.refreshToken);
 };
 
@@ -142,8 +141,43 @@ export const refreshTokenService = async (token: string)
         throw new Error("Refresh token is invalid or has been revoked.");
     }
 
-    const {accessToken, refreshToken} = await generateTokens(user.id);
+    const { accessToken, refreshToken } = await generateTokens(user.id);
 
 
     return { accessToken, refreshToken };
 };
+/**
+ * 
+ * @param data 
+ */
+export const resetPasswordService = async (data: { userId: string, oldPassword: string, newPassword: string, confirmPassword: string }): Promise<void> => {
+
+    const user = await User.findById(data.userId);
+
+    if (!user)
+        throw new Error("User not found");
+
+    const isPasswordCorrect = await user.isPasswordCorrect(data.oldPassword);
+    console.log(user)
+    if (!isPasswordCorrect)
+        throw new Error("Incorrect password");
+
+    user.password = data.newPassword;
+
+    const passwordUpdated = await user.save();
+
+    if (!passwordUpdated)
+        throw new Error("Password not updated");
+
+    return;
+}
+
+
+
+
+
+
+
+
+
+

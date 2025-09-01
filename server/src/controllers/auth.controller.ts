@@ -1,13 +1,16 @@
 import { Request, Response, NextFunction } from "express";
 import { asyncHandler } from "../utils/asyncHandler";
-import { signUpService, loginService, logoutService, refreshTokenService } from "../services/auth.service";
+import { signUpService, loginService, logoutService, refreshTokenService, resetPasswordService } from "../services/auth.service";
 import { SignUpInput } from "../validation/schema/user/create";
 import { LoginInput } from "../validation/schema/user/login";
 import { env } from "../config/env";
 import { sendOtpMailService } from "../services/otp.service";
+import { ResetPasswordInput } from "../validation/schema/user/resetPassword";
+import { IUserDocument } from "../models/User";
 
 
-const signUp = asyncHandler(async (req: Request<{}, {}, SignUpInput>, res: Response, next: NextFunction) => {
+const signUp = asyncHandler(async (req: Request<{}, {}, SignUpInput>, res: Response, next: NextFunction)
+: Promise<Response | void> => {
 
     const { fullName, email, username, password, confirmPassword, termsAccept } = req.body;
 
@@ -20,7 +23,7 @@ const signUp = asyncHandler(async (req: Request<{}, {}, SignUpInput>, res: Respo
         termsAccept
     })
 
-    const sessionId = sendOtpMailService(newUser)
+    const sessionId = await sendOtpMailService(newUser)
 
     res.status(201).send({
         sessionId: sessionId,
@@ -28,7 +31,8 @@ const signUp = asyncHandler(async (req: Request<{}, {}, SignUpInput>, res: Respo
     })
 })
 
-const login = asyncHandler(async (req: Request<{}, {}, LoginInput>, res: Response, next: NextFunction) => {
+const login = asyncHandler(async (req: Request<{}, {}, LoginInput>, res: Response, next: NextFunction)
+: Promise<Response | void> => {
 
     const { emailOrUsername, password } = req.body;
 
@@ -46,7 +50,8 @@ const login = asyncHandler(async (req: Request<{}, {}, LoginInput>, res: Respons
         })
 })
 
-const logout = asyncHandler(async (req: Request<{}, {}, string>, res: Response, next: NextFunction) => {
+const logout = asyncHandler(async (req: Request<{}, {}, string>, res: Response, next: NextFunction)
+: Promise<Response | void> => {
 
     const { refreshToken } = req.cookies;
     if (!refreshToken) {
@@ -62,7 +67,8 @@ const logout = asyncHandler(async (req: Request<{}, {}, string>, res: Response, 
         .send("user logged out successfully")
 })
 
-const resetRefreshToken = asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
+const resetRefreshToken = asyncHandler(async (req: Request, res: Response, next: NextFunction)
+: Promise<Response | void> => {
 
     const token = req.cookies.refreshToken || req.header('Authorization')?.replace('Bearer ', '');
 
@@ -91,11 +97,41 @@ const resetRefreshToken = asyncHandler(async (req: Request, res: Response, next:
 
 })
 
+// @NOTE: Password reset controller
+
+interface InputRequest extends Request {
+    user?: IUserDocument
+}
+
+const resetPassword = asyncHandler(async (req: InputRequest, res: Response, next: NextFunction)
+    : Promise<Response | void> => {
+
+    if (!req.user) {
+        return res.status(401).json({ error: 'Unauthorized' })
+    }
+
+    const userId = req.user._id.toString()
+
+    const data = {
+        userId,
+        oldPassword: req.body.oldPassword,
+        newPassword: req.body.newPassword,
+        confirmPassword: req.body.confirmPassword
+    }
+
+    await resetPasswordService(data)
+
+    res.status(200)
+        .json({
+            "message": "Password reset successfully"
+        })
+})
 
 export default {
     signUp,
     login,
     logout,
-    resetRefreshToken
-    
+    resetRefreshToken,
+    resetPassword
+
 }
