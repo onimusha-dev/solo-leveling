@@ -8,6 +8,12 @@ function MainLayout(){
         <Outlet/>
         <NavBar/>
 
+
+
+
+
+
+
         </>
     )
 }

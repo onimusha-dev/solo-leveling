@@ -4,7 +4,7 @@ import { signUpService, loginService, logoutService, refreshTokenService } from 
 import { SignUpInput } from "../validation/schema/user/create";
 import { LoginInput } from "../validation/schema/user/login";
 import { env } from "../config/env";
-import { sendOtpService } from "../services/otp.service";
+import { sendOtpMailService } from "../services/otp.service";
 
 
 const signUp = asyncHandler(async (req: Request<{}, {}, SignUpInput>, res: Response, next: NextFunction) => {
@@ -20,10 +20,10 @@ const signUp = asyncHandler(async (req: Request<{}, {}, SignUpInput>, res: Respo
         termsAccept
     })
 
-    sendOtpService(newUser)
+    const sessionId = sendOtpMailService(newUser)
 
     res.status(201).send({
-        newUser,
+        sessionId: sessionId,
         "message": "User created successfully"
     })
 })
@@ -37,11 +37,11 @@ const login = asyncHandler(async (req: Request<{}, {}, LoginInput>, res: Respons
         password
     })
 
-    sendOtpService(user)
+    const sessionId = await sendOtpMailService(user)
 
     res.status(201)
         .send({
-            user,
+            sessionId: sessionId,
             "message": "User logged in successfully"
         })
 })

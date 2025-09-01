@@ -4,36 +4,34 @@ import nodemailer from "nodemailer"
 import { env } from "../config/env";
 import { transporter } from "../config/transporter";
 import { IUser } from "../models/User";
-import crypto from "crypto"
+import crypto from "crypto";
+import bcrypt from "bcrypt";
 
 
-const isOtpValid = async (otp: string): Promise<boolean> => {
-    const otpDoc = await Otp.findOne({ otp })
-    if (!otpDoc || otpDoc.expiresAt < new Date())
-        return false
-    return true
-}
+// @NOTE:OTP ganaration and string block
 
-
-// @NOTE: this is for generating the otp 
-const generateOTP = (length = 6) => {
-    const digits = "0123456789";
-    let otp = "";
-    for (let i = 0; i < length; i++) {
-        const index = crypto.randomInt(0, digits.length);
-        otp += digits[index];
+const createAndStoreOtpInDatabase = async (userId: string) => {
+    const generateOTP = (length = 6) => {
+        const digits = "0123456789";
+        let otp = "";
+        for (let i = 0; i < length; i++) {
+            const index = crypto.randomInt(0, digits.length);
+            otp += digits[index];
+        }
+        return otp;
     }
-    console.log(otp)
-    return otp;
-}
 
-// @:NOTE: for generating otp message and send it to the user
-export const sendOtpService = async (user: Omit<IUser, "password" | "refreshToken"> & { id: string }) => {
     const otp = generateOTP()
+    const sessionId = crypto.randomUUID()
+    // const oldOtpDeleted = await Otp.deleteMany({ sessionId: sessionId })
+
+    // if (!oldOtpDeleted)
+    //     throw new Error("something went wrong, try again!")
 
     const otpDoc = await Otp.create(
         {
-            userId: user.id,  // <— required
+            userId: userId,
+            sessionId: sessionId,
             otp: otp,
             expiry: new Date(Date.now() + 5 * 60 * 1000)
         }
@@ -41,6 +39,16 @@ export const sendOtpService = async (user: Omit<IUser, "password" | "refreshToke
 
     if (!otpDoc)
         throw new Error("something went wrong, try again!")
+
+    return { sessionId, otp }
+}
+
+// generate and send otp
+
+export const sendOtpMailService = async (user: Omit<IUser, "password" | "refreshToken"> & { id: string }
+): Promise<string> => {
+
+    const { sessionId, otp } = await createAndStoreOtpInDatabase(user.id)
 
     const info = await transporter.sendMail({
         from: `Solo Leveling <${env.smtpUser}>`,
@@ -69,24 +77,35 @@ export const sendOtpService = async (user: Omit<IUser, "password" | "refreshToke
     });
     console.log("Message sent: %s", info.messageId);
     console.log("Preview URL: %s", nodemailer.getTestMessageUrl(info));
+    console.log(otp)
+    return sessionId;
 }
 
-// @NOTE: this function will verify the otps
-export const otpVerifyService = async (otp: string)
+// @NOTE: OTP verification block
+
+export const otpVerifyService = async (data: { sessionId: string, otp: string })
     : Promise<{ accessToken: string, refreshToken: string }> => {
-    console.log("otp verify service called")
 
-    const otpDoc = await Otp.findOne({ otp })
-    if (!otpDoc)
-        throw new Error("Invalid OTP")
+    const otpDoc = await Otp.findOne({ sessionId: data.sessionId })
+    console.log(otpDoc)
+    if (!otpDoc) {
+        console.log("otp not found")
+        throw new Error("OTP not found")
+    }
 
-    const isValod = await isOtpValid(otp)
-    if (!isValod)
+    const otpMatched = await bcrypt.compare(data.otp, otpDoc.otp)
+
+    if (!otpMatched) {
+        console.log("otp not matched")
+        throw new Error("OTP not matched")
+    }
+
+    if (otpDoc.expiresAt < new Date()) {
+        console.log("OTP has expired")
         throw new Error("OTP has expired")
+    }
 
-    const delepedOtp = await Otp.findByIdAndDelete({ otp })
-    if (!delepedOtp)
-        throw new Error("something went wrong, try again!")
+    await Otp.deleteOne({ sessionId: data.sessionId })
 
     const { accessToken, refreshToken } = await generateTokens(otpDoc.userId.toString())
     return {
