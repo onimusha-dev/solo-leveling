@@ -87,7 +87,7 @@ export const otpVerifyService = async (data: { sessionId: string, otp: string })
     : Promise<{ accessToken: string, refreshToken: string }> => {
 
     const otpDoc = await Otp.findOne({ sessionId: data.sessionId })
-    console.log(otpDoc)
+
     if (!otpDoc) {
         console.log("otp not found")
         throw new Error("OTP not found")

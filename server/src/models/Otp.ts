@@ -24,8 +24,8 @@ const otpSchema = new Schema<IOtp>({
     },
     expiresAt: {
         type: Date,
-        default: Date.now,
-        expires: 300
+        default: () => Date.now() + 5 * 60 * 1000,
+        expires: 0
     }
 })
 
