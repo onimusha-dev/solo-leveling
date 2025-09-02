@@ -53,48 +53,18 @@ const login = asyncHandler(async (req: Request<{}, {}, LoginInput>, res: Respons
 const logout = asyncHandler(async (req: Request<{}, {}, string>, res: Response, next: NextFunction)
 : Promise<Response | void> => {
 
-    const { refreshToken } = req.cookies;
-    if (!refreshToken) {
+    const { accessToken } = req.cookies;
+    if (!accessToken) {
         res.send("No refresh token provided")
         throw new Error("No refresh token provided")
     }
 
-    await logoutService(refreshToken)
+    await logoutService(accessToken)
 
     res.status(200)
         .clearCookie('refreshToken')
         .clearCookie('accessToken')
         .send("user logged out successfully")
-})
-
-const resetRefreshToken = asyncHandler(async (req: Request, res: Response, next: NextFunction)
-: Promise<Response | void> => {
-
-    const token = req.cookies.refreshToken || req.header('Authorization')?.replace('Bearer ', '');
-
-    if (!token) {
-        return res.status(401)
-            .json({
-                "message": "No refresh token provided"
-            })
-    }
-    const { accessToken, refreshToken } = await refreshTokenService(token)
-
-    return res.status(200)
-        .cookie('accessToken', accessToken, {
-            httpOnly: env.httpOnlyCookie,
-            secure: env.secureCookie,
-            maxAge: 24 * 60 * 60 * 1000
-        })
-        .cookie('refreshToken', refreshToken, {
-            httpOnly: env.httpOnlyCookie,
-            secure: env.secureCookie,
-            maxAge: 24 * 60 * 60 * 1000
-        })
-        .json({
-            "message": "Access token refreshed successfully"
-        })
-
 })
 
 // @NOTE: Password reset controller
@@ -125,6 +95,36 @@ const resetPassword = asyncHandler(async (req: InputRequest, res: Response, next
         .json({
             "message": "Password reset successfully"
         })
+})
+
+const resetRefreshToken = asyncHandler(async (req: Request, res: Response, next: NextFunction)
+    : Promise<Response | void> => {
+
+    const token = req.cookies.refreshToken || req.header('Authorization')?.replace('Bearer ', '');
+
+    if (!token) {
+        return res.status(401)
+            .json({
+                "message": "No refresh token provided"
+            })
+    }
+    const { accessToken, refreshToken } = await refreshTokenService(token)
+
+    return res.status(200)
+        .cookie('accessToken', accessToken, {
+            httpOnly: env.httpOnlyCookie,
+            secure: env.secureCookie,
+            maxAge: 24 * 60 * 60 * 1000
+        })
+        .cookie('refreshToken', refreshToken, {
+            httpOnly: env.httpOnlyCookie,
+            secure: env.secureCookie,
+            maxAge: 24 * 60 * 60 * 1000
+        })
+        .json({
+            "message": "Tokens refreshed successfully"
+        })
+
 })
 
 export default {

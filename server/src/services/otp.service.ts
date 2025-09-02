@@ -10,7 +10,7 @@ import bcrypt from "bcrypt";
 
 // @NOTE:OTP ganaration and string block
 
-const createAndStoreOtpInDatabase = async (userId: string) => {
+const createAndStoreOtpInDatabase = async (userId: string): Promise<{ sessionId: string, otp: string }> => {
     const generateOTP = (length = 6) => {
         const digits = "0123456789";
         let otp = "";
@@ -80,7 +80,7 @@ export const sendOtpMailService = async (user: Omit<IUser, "password" | "refresh
 // @NOTE: OTP verification block
 
 export const otpVerifyService = async (data: { sessionId: string, otp: string })
-    : Promise<{ accessToken: string, refreshToken: string }> => {
+    : Promise<IAuthTokens> => {
 
     const otpDoc = await Otp.findOne({ sessionId: data.sessionId })
 
