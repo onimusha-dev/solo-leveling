@@ -4,9 +4,10 @@ import jwt from 'jsonwebtoken'
 import { SignUpInput } from "../validation/schema/user/create";
 import { LoginInput } from "../validation/schema/user/login";
 import bcrypt from "bcrypt";
+import { ResetPasswordInput } from "../validation/schema/user/resetPassword";
 
 
-export const generateTokens = async (id: string): Promise<{ accessToken: string, refreshToken: string }> => {
+export const generateTokens = async (id: string): Promise<IAuthTokens> => {
 
     const user = await User.findById(id);
     if (!user)
@@ -101,21 +102,40 @@ export const loginService = async (
     return { id: isUser._id.toString(), ...newUserObject };
 }
 
-export const logoutService = async (refreshToken: string): Promise<void> => {
+export const logoutService = async (accessToken: string): Promise<void> => {
 
-    const decodedToken = jwt.verify(refreshToken, env.refreshTokenCode) as { id: string };
+    const decodedToken = jwt.verify(accessToken, env.accessTokenCode) as { id: string };
 
     const user = await User.findById(decodedToken.id);
 
     if (!user)
         throw new Error("User not found");
 
-    const isVerified = await verifyRefreshToken(refreshToken, user);
-
-    if (!isVerified)
-        throw new Error("Invalid refresh token");
-
     await User.updateOne({ _id: user._id }, { $set: { refreshToken: '' } });
+    return;
+}
+
+// @NOTE: Refresh token reset service
+
+export const resetPasswordService = async (data: ResetPasswordInput & { userId: string }): Promise<void> => {
+
+    const user = await User.findById(data.userId);
+
+    if (!user)
+        throw new Error("User not found");
+
+    const isPasswordCorrect = await user.isPasswordCorrect(data.oldPassword);
+
+    if (!isPasswordCorrect)
+        throw new Error("Incorrect password");
+
+    user.password = data.newPassword;
+
+    const passwordUpdated = await user.save();
+
+    if (!passwordUpdated)
+        throw new Error("Password not updated");
+
     return;
 }
 
@@ -126,8 +146,7 @@ export const logoutService = async (refreshToken: string): Promise<void> => {
  * @throws Error if the refresh token is invalid or expired.
  */
 
-export const refreshTokenService = async (token: string)
-    : Promise<{ accessToken: string, refreshToken: string }> => {
+export const refreshTokenService = async (token: string): Promise<IAuthTokens> => {
 
     const decodedToken = jwt.verify(token, env.refreshTokenCode) as { id: string };
 
@@ -143,34 +162,8 @@ export const refreshTokenService = async (token: string)
 
     const { accessToken, refreshToken } = await generateTokens(user.id);
 
-
     return { accessToken, refreshToken };
 };
-/**
- * 
- * @param data 
- */
-export const resetPasswordService = async (data: { userId: string, oldPassword: string, newPassword: string, confirmPassword: string }): Promise<void> => {
-
-    const user = await User.findById(data.userId);
-
-    if (!user)
-        throw new Error("User not found");
-
-    const isPasswordCorrect = await user.isPasswordCorrect(data.oldPassword);
-    console.log(user)
-    if (!isPasswordCorrect)
-        throw new Error("Incorrect password");
-
-    user.password = data.newPassword;
-
-    const passwordUpdated = await user.save();
-
-    if (!passwordUpdated)
-        throw new Error("Password not updated");
-
-    return;
-}
 
 
 
