@@ -13,7 +13,9 @@ const requiredEnvVars = [
     "HTTP_ONLY_COOKIE",
     "SECURE_COOKIE",
     "SMTP_USER",
-    "SMTP_PASS"
+    "SMTP_PASS",
+    "GOOGLE_CLIENT_ID",
+    "GOOGLE_CLIENT_SECRET"  
 ] as const;
 
 for (const varName of requiredEnvVars) {
@@ -42,4 +44,7 @@ export const env = {
 
     smtpUser: process.env.SMTP_USER,
     smtpPass: process.env.SMTP_PASS,
+
+    googleClientID: process.env.GOOGLE_CLIENT_ID,
+    googleClientSecret: process.env.GOOGLE_CLIENT_SECRET,
 };
