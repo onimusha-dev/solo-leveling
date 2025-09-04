@@ -14,6 +14,10 @@ declare namespace NodeJS {
         HTTP_ONLY_COOKIE: 'true' | 'false';
         SECURE_COOKIE: 'true' | 'false';
 
+        SMTP_USER: string;
+        SMTP_PASS: string;
 
+        GOOGLE_CLIENT_ID: string;
+        GOOGLE_CLIENT_SECRET: string;
     }
 }

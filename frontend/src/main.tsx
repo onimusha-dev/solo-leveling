@@ -20,6 +20,7 @@ import Login from './pages/Auth/Login'
 import Register from './pages/Auth/Register'
 import { Navigate } from 'react-router'
 import PrivacyPolicy from './pages/Policies/PrivacyPolicy'
+import ResetPassword from './pages/Auth/ResetPassword'
 
 
 const router = createBrowserRouter(
@@ -52,7 +53,7 @@ const router = createBrowserRouter(
         { index: true, element: <Navigate to="login" replace /> },
         { path: 'login', element: <Login /> },
         { path: 'register', element: <Register /> },
-        { path: 'reset-password', element: <Home /> },
+        { path: 'reset-password', element: <ResetPassword /> },
       ]
     },
     {
